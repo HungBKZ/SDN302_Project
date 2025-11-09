@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        :root{
+            --bg:#f6f8fb;
+            --card:#ffffff;
+            --accent:#2b8aef;
+            --mine:#d7f0ff;
+            --theirs:#f1f3f5;
+            --muted:#778089;
+        }
+        html,body{height:100%;margin:0;padding:0;background:var(--bg);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
+        .container{max-width:980px;margin:24px auto;padding:18px}
+        .chat-card{background:var(--card);border-radius:12px;box-shadow:0 6px 18px rgba(22,35,60,0.06);overflow:hidden;display:flex;flex-direction:column;height:78vh}
+        .chat-header{padding:18px 20px;border-bottom:1px solid #eef2f6;display:flex;align-items:center;gap:12px}
+        .chat-header h3{margin:0;font-size:18px}
+        #messages{flex:1;padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.01))}
+        .msg{display:flex;align-items:flex-end;gap:10px;max-width:75%;}
+        .msg .avatar{width:36px;height:36px;border-radius:50%;background:#e6eefb;color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:600}
+        .msg .bubble{padding:10px 12px;border-radius:12px;background:var(--theirs);box-shadow:0 1px 0 rgba(0,0,0,0.02);}
+        .msg .bubble .content{white-space:pre-wrap;color:#0f1720}
+        .msg .bubble .meta{font-size:11px;color:var(--muted);margin-top:6px}
+        .msg.me{align-self:flex-end;flex-direction:row-reverse}
+        .msg.me .bubble{background:var(--mine)}
+        .msg.me .avatar{background:linear-gradient(135deg,#bfe9ff,#9cd7ff);color:#055aa3}
+        .composer{padding:12px;border-top:1px solid #eef2f6;display:flex;gap:8px;align-items:center}
+        .composer input[type="text"]{flex:1;padding:12px;border-radius:10px;border:1px solid #e6edf3;background:#fbfdff}
+        .composer button{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+        .meta{color:var(--muted);font-size:12px}
+        .top-controls{display:flex;gap:8px;align-items:center;width:100%}
+        textarea#token{height:56px}
+        @media(max-width:600px){.chat-card{height:82vh}.msg{max-width:92%}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-card">
+            <div class="chat-header">
+                <div style="flex:1">
+                    <h3>Realtime Chat</h3>
+                    <div class="meta">Paste your JWT below, enter recipient id and click Connect</div>
+                </div>
+                <div style="width:320px">
+                    <div class="top-controls">
+                        <textarea id="token" placeholder="JWT token or 'Bearer ...'" style="width:100%"></textarea>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:8px">
+                        <input id="to" type="text" placeholder="Recipient userId" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6edf3" />
+                        <button id="connectBtn">Connect</button>
+                        <button id="disconnectBtn" disabled>Disconnect</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="messages" aria-live="polite"></div>
+
+            <div class="composer">
+                <input id="content" type="text" placeholder="Type a message..." />
+                <button id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    let socket = null;
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const tokenEl = document.getElementById('token');
+    const toEl = document.getElementById('to');
+    const messagesEl = document.getElementById('messages');
+    const contentEl = document.getElementById('content');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function addMessage(msg, isMine) {
+        const d = document.createElement('div');
+        d.className = 'msg' + (isMine ? ' me' : '');
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        const senderName = msg.SenderId && msg.SenderId.Name ? msg.SenderId.Name : (msg.SenderId || '');
+        avatar.textContent = senderName ? senderName.charAt(0).toUpperCase() : '?';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+
+        const content = document.createElement('div');
+        content.className = 'content';
+        content.textContent = msg.Content;
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = (senderName || '') + ' • ' + new Date(msg.SentAt).toLocaleString();
+
+        bubble.appendChild(content);
+        bubble.appendChild(meta);
+
+        d.appendChild(avatar);
+        d.appendChild(bubble);
+
+        messagesEl.appendChild(d);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    connectBtn.addEventListener('click', () => {
+    const token = tokenEl.value.trim();
+    const otherId = toEl.value.trim();
+    if (!token) return alert('Please paste your token');
+    socket = io({ auth: { token, otherId } });
+
+        socket.on('connect', () => {
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+            console.log('connected', socket.id);
+        });
+
+        let currentUserId = null;
+        let historyReceived = false;
+        socket.on('connected', (data) => {
+            console.log('server connected as', data.userId);
+            currentUserId = data.userId;
+
+            // If server doesn't send history event within timeout, fall back to REST
+            const otherId = toEl.value.trim();
+            if (otherId) {
+                historyReceived = false;
+                setTimeout(() => {
+                    if (!historyReceived) {
+                        console.log('No socket history received, falling back to REST load');
+                        loadConversation(otherId);
+                    }
+                }, 500); // wait 500ms for history
+            }
+        });
+
+        socket.on('message', (msg) => {
+            // msg is the saved message object from server
+            const isMine = currentUserId && msg.SenderId && String(msg.SenderId._id || msg.SenderId) === String(currentUserId);
+            addMessage(msg, isMine);
+        });
+
+        // history event: array of messages (newest-first from server)
+        socket.on('history', (messages) => {
+            if (!Array.isArray(messages)) return;
+            historyReceived = true;
+            messagesEl.innerHTML = '';
+            const msgs = messages.slice().reverse(); // oldest -> newest
+            msgs.forEach(m => {
+                const isMine = currentUserId && m.SenderId && String(m.SenderId._id || m.SenderId) === String(currentUserId);
+                addMessage(m, isMine);
+            });
+        });
+
+        socket.on('error', (err) => {
+            console.error('socket error', err);
+        });
+
+        socket.on('disconnect', () => {
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            console.log('disconnected');
+        });
+    });
+
+    disconnectBtn.addEventListener('click', () => {
+        if (socket) socket.disconnect();
+    });
+
+    sendBtn.addEventListener('click', () => {
+        const to = toEl.value.trim();
+        const content = contentEl.value.trim();
+        if (!socket) return alert('Not connected');
+        if (!to) return alert('Please enter recipient id');
+        if (!content) return alert('Please enter message');
+
+        socket.emit('private_message', { to, content }, (ack) => {
+            if (ack && ack.success) {
+                // message saved and server emits it back
+                contentEl.value = '';
+            } else {
+                alert('Send failed: ' + (ack && ack.message ? ack.message : 'unknown'));
+            }
+        });
+    });
+
+    // Press Enter to send
+    contentEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendBtn.click();
+        }
+    });
+
+    async function loadConversation(otherId) {
+        const token = tokenEl.value.trim();
+        if (!token) return;
+        try {
+            const raw = token.startsWith('Bearer ') ? token : token;
+            const res = await fetch(`/api/chat/conversation/${otherId}?limit=500`, {
+                headers: {
+                    'Authorization': raw.startsWith('Bearer ') ? raw : `Bearer ${raw}`,
+                    'Accept': 'application/json'
+                }
+            });
+            if (!res.ok) {
+                console.error('Failed to load conversation', res.status);
+                return;
+            }
+            const body = await res.json();
+            if (!body || !body.data) return;
+            messagesEl.innerHTML = '';
+            // messages are sorted by SentAt desc on server; reverse to show oldest -> newest
+            const msgs = Array.isArray(body.data) ? body.data.slice().reverse() : [];
+            msgs.forEach(m => {
+                const isMine = currentUserId && m.SenderId && String(m.SenderId._id || m.SenderId) === String(currentUserId);
+                addMessage(m, isMine);
+            });
+
+            // After loading, mark messages as read (messages from other -> me)
+            try {
+                await fetch(`/api/chat/conversation/${otherId}/read`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': raw.startsWith('Bearer ') ? raw : `Bearer ${raw}` }
+                });
+            } catch (e) {
+                // ignore mark-as-read errors
+            }
+        } catch (e) {
+            console.error('Error loading conversation', e);
+        }
+    }
+</script>
+</body>
+</html>

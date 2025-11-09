@@ -83,6 +83,14 @@ router.get('/manager/dashboard', (req, res) => {
 });
 
 /**
+ * @route GET /chat
+ * @desc  Render chat page (basic realtime UI)
+ */
+router.get('/chat', (req, res) => {
+    res.render('chat');
+});
+
+/**
  * @route   GET /manager-dashboard
  * @desc    Render trang quản lý (alternative route)
  * @access  Manager only
@@ -92,7 +100,7 @@ router.get('/manager-dashboard', (req, res) => {
 });
 
 /**
- * @route   GET /coupon
+ * @route   GET /cou pon
  * @desc    Render trang quản lý khuyến mãi
  * @access  Manager only
  */

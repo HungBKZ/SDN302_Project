@@ -30,7 +30,20 @@ mongoose.connect(process.env.MONGO_URI, {
     .then(() => {
         console.log("✅ MongoDB connected");
         const PORT = process.env.PORT || 1234;
-        app.listen(PORT, () => {
+        const http = require('http');
+        const server = http.createServer(app);
+
+        // Initialize socket.io after HTTP server is created
+        try {
+            const socketLoader = require('./loaders/socket');
+            if (typeof socketLoader.init === 'function') {
+                socketLoader.init(server);
+            }
+        } catch (err) {
+            console.warn('⚠️  Socket loader not initialized:', err.message);
+        }
+
+        server.listen(PORT, () => {
             console.log(`🚀 Server running at: http://127.0.0.1:${PORT}`);
         });
     })

@@ -261,17 +261,21 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Đang xử lý...';
 
+      // Generate UserCode from email
+      const userCode = 'USER' + Date.now().toString().slice(-8);
+
       try {
         const response = await fetch('/api/account/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            UserCode: userCode,
             UserEmail: email,
+            UserPhone: phone,
             UserPassword: password,
             Name: name,
-            Phone: phone,
             IdentityCard: identityCard,
-            Address: address || undefined
+            UserAddress: address || ''
           })
         });
 

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../../core/middlewares/auth');
 
 /**
  * @route   GET /login
@@ -83,15 +82,21 @@ router.get('/manager/dashboard', (req, res) => {
     res.render('manager-dashboard');
 });
 
+/**
+ * @route   GET /manager-dashboard
+ * @desc    Render trang quản lý (alternative route)
+ * @access  Manager only
+ */
+router.get('/manager-dashboard', (req, res) => {
+    res.render('manager-dashboard');
+});
 
 /**
  * @route   GET /coupon
- * @desc    Render trang quản lý khuyến mãi (Admin / Manager)
- * @access  Admin or Manager
+ * @desc    Render trang quản lý khuyến mãi
+ * @access  Manager only
  */
 router.get('/coupon', (req, res) => {
-    // Render page; coupon.ejs contains client-side check:
-    // nếu chưa đăng nhập -> redirect về /login giống menu.ejs
     res.render('coupon');
 });
 

@@ -3,6 +3,7 @@ const express = require('express');
 // Import các router modules
 const menuRouter = require('../modules/menu/menu.router');
 const accountRouter = require('../modules/account/account.router');
+const tableRouter = require('../modules/table/table.router');
 // const authRouter = require('../modules/auth/auth.router');
 // const orderRouter = require('../modules/order/order.router');
 
@@ -14,6 +15,7 @@ const initRoutes = (app) => {
     // API routes
     app.use('/api/menu', menuRouter);
     app.use('/api/account', accountRouter);
+    app.use('/api/tables', tableRouter);
     // Uncomment khi đã có router tương ứng
     // app.use('/api/auth', authRouter);
     // app.use('/api/order', orderRouter);
@@ -36,6 +38,7 @@ const initRoutes = (app) => {
             endpoints: {
                 menu: '/api/menu',
                 account: '/api/account',
+                tables: '/api/tables',
                 // auth: '/api/auth',
                 // order: '/api/order',
                 health: '/health'

@@ -1,24 +1,35 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const path = require('path');
-const tableRouter = require('./modules/table/table.router');
-
 const dotenv = require('dotenv');
+
+// Import routes loader
+const initRoutes = require('./loaders/routes');
+
 dotenv.config();
 
 const app = express();
+
+// Middlewares
 app.use(express.json());
+app.use(cors());
 
+// Initialize all routes (menu, account, etc.)
+initRoutes(app);
 
-app.use('/api/tables', tableRouter);
-
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("Connected to MongoDB"))
-    .catch(err => console.error("Could not connect to MongoDB", err));
-
-const PORT = process.env.PORT;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Connect to MongoDB and start server
+mongoose.connect(process.env.MONGO_URI, { 
+    useNewUrlParser: true, 
+    useUnifiedTopology: true 
+})
+    .then(() => {
+        console.log("✅ MongoDB connected");
+        const PORT = process.env.PORT || 1234;
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running at: http://127.0.0.1:${PORT}`);
+        });
+    })
+    .catch(err => console.error("❌ Could not connect to MongoDB:", err));
 
 module.exports = app;

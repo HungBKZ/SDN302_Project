@@ -446,6 +446,11 @@
 
     <div class="filter-bar">
       <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm món ăn...">
+      <select id="typeFilter">
+        <option value="">Tất cả loại</option>
+        <option value="Food">Đồ ăn</option>
+        <option value="Drink">Đồ uống</option>
+      </select>
       <select id="statusFilter">
         <option value="">Tất cả trạng thái</option>
         <option value="Available">Có sẵn</option>
@@ -483,10 +488,8 @@
               <label>Loại món <span class="required">*</span></label>
               <select id="dishType" required>
                 <option value="">Chọn loại món</option>
-                <option value="Appetizer">Khai vị</option>
-                <option value="Main Course">Món chính</option>
-                <option value="Dessert">Tráng miệng</option>
-                <option value="Beverage">Đồ uống</option>
+                <option value="Food">Đồ ăn</option>
+                <option value="Drink">Đồ uống</option>
               </select>
             </div>
 
@@ -574,21 +577,28 @@
     // Load statistics
     async function loadStatistics() {
       try {
-        const response = await fetch('/api/menu?limit=1000', {
+        console.log('[Stats] Loading statistics...');
+        const response = await fetch('/api/menu?limit=100', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
+        console.log('[Stats] Response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
-          const dishes = data.data;
+          console.log('[Stats] Data received:', data);
+          const dishes = data.data || [];
           
+          console.log('[Stats] Total dishes:', dishes.length);
           document.getElementById('totalDishes').textContent = dishes.length;
           document.getElementById('availableDishes').textContent = dishes.filter(d => d.DishStatus === 'Available').length;
           document.getElementById('unavailableDishes').textContent = dishes.filter(d => d.DishStatus === 'Unavailable').length;
           document.getElementById('insufficientDishes').textContent = dishes.filter(d => d.IngredientStatus === 'Insufficient').length;
+        } else {
+          console.error('[Stats] Failed to load:', response.statusText);
         }
       } catch (error) {
-        console.error('Load statistics error:', error);
+        console.error('[Stats] Load statistics error:', error);
       }
     }
 
@@ -712,9 +722,11 @@
       currentFilters = {};
       
       const search = document.getElementById('searchInput').value.trim();
+      const type = document.getElementById('typeFilter').value;
       const status = document.getElementById('statusFilter').value;
 
       if (search) currentFilters.search = search;
+      if (type) currentFilters.type = type;
       if (status) currentFilters.status = status;
 
       loadDishes(1);
@@ -723,6 +735,7 @@
     // Reset filters
     function resetFilters() {
       document.getElementById('searchInput').value = '';
+      document.getElementById('typeFilter').value = '';
       document.getElementById('statusFilter').value = '';
       currentFilters = {};
       loadDishes(1);

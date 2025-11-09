@@ -6,6 +6,7 @@ const accountRouter = require('../modules/account/account.router');
 const managerRouter = require('../modules/manager/manager.router');
 const favoriteRouter = require('../modules/favorite/favorite.router');
 const tableRouter = require('../modules/table/table.router');
+const reservationRouter = require('../modules/reservation/reservation.router');
 // const authRouter = require('../modules/auth/auth.router');
 // const orderRouter = require('../modules/order/order.router');
 
@@ -20,6 +21,7 @@ const initRoutes = (app) => {
     app.use('/api/manager', managerRouter);
     app.use('/api/favorite', favoriteRouter);
     app.use('/api/tables', tableRouter);
+    app.use('/api/reservations', reservationRouter);
     // Uncomment khi đã có router tương ứng
     // app.use('/api/auth', authRouter);
     // app.use('/api/order', orderRouter);

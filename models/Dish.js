@@ -51,6 +51,25 @@ const dishSchema = new mongoose.Schema(
     }
 );
 
+// Index gợi ý cho tìm kiếm theo tên + trạng thái
+// dishSchema.index({ DishName: 1, DishStatus: 1 });
+
+// // Static helpers (tùy chọn)
+// dishSchema.statics.findAvailable = function () {
+//     return this.find({ DishStatus: 'Available' });
+// };
+
+// dishSchema.statics.findByName = function (name) {
+//     return this.findOne({ DishName: name });
+// };
+
+// // Instance helpers (tùy chọn)
+// dishSchema.methods.markUnavailable = async function () {
+//     this.DishStatus = 'Unavailable';
+//     await this.save();
+//     return this;
+// };
+
 const Dish = mongoose.model('Dish', dishSchema, 'dishs');
 
 module.exports = Dish;

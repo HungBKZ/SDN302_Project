@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký tài khoản</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f7ff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .register-card {
+      background:#fff;
+      width:100%;
+      max-width:480px;
+      border-radius:12px;
+      box-shadow:0 4px 12px rgba(59,130,246,0.1);
+      overflow:hidden;
+    }
+    .header {
+      background:#3b82f6;
+      padding:28px 24px;
+      text-align:center;
+      color:#fff;
+    }
+    .header h1 {
+      font-size:24px;
+      font-weight:600;
+      margin-bottom:4px;
+    }
+    .header p {
+      font-size:14px;
+      opacity:0.95;
+    }
+    .form-container {
+      padding:28px 24px;
+    }
+    .form-group {
+      margin-bottom:16px;
+    }
+    .form-group label {
+      display:block;
+      font-size:14px;
+      font-weight:500;
+      color:#374151;
+      margin-bottom:6px;
+    }
+    .form-group label .required {
+      color:#ef4444;
+    }
+    .input-wrapper input {
+      width:100%;
+      padding:11px 14px;
+      font-size:15px;
+      border:1px solid #d1d5db;
+      border-radius:6px;
+      transition: border-color 0.2s;
+    }
+    .input-wrapper input:focus {
+      outline:none;
+      border-color:#3b82f6;
+    }
+    .form-row {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .btn-submit {
+      width:100%;
+      padding:12px;
+      font-size:15px;
+      font-weight:600;
+      color:#fff;
+      background:#3b82f6;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      margin-top:8px;
+    }
+    .btn-submit:hover:not(:disabled) {
+      background:#2563eb;
+    }
+    .btn-submit:disabled {
+      opacity:0.6;
+      cursor:not-allowed;
+    }
+    .links {
+      text-align:center;
+      margin-top:16px;
+      font-size:13px;
+      color:#6b7280;
+    }
+    .links a {
+      color:#3b82f6;
+      text-decoration:none;
+      font-weight:500;
+    }
+    .links a:hover {
+      text-decoration:underline;
+    }
+    .alert {
+      padding:10px 12px;
+      border-radius:6px;
+      margin-bottom:14px;
+      font-size:14px;
+    }
+    .alert.error {
+      background:#fee;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+    .alert.success {
+      background:#f0fdf4;
+      color:#166534;
+      border:1px solid #bbf7d0;
+    }
+    .password-hint {
+      font-size:12px;
+      color:#6b7280;
+      margin-top:4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-card">
+    <div class="header">
+      <h1>🍽️ Đăng ký tài khoản</h1>
+      <p>Tạo tài khoản mới để sử dụng dịch vụ</p>
+    </div>
+
+    <div class="form-container">
+      <div id="alertBox"></div>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label>Email <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="email" name="email" id="email" required autocomplete="email" placeholder="example@gmail.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Mật khẩu <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" name="password" id="password" required autocomplete="new-password" placeholder="Tối thiểu 6 ký tự">
+          </div>
+          <div class="password-hint">Mật khẩu phải có ít nhất 6 ký tự</div>
+        </div>
+
+        <div class="form-group">
+          <label>Xác nhận mật khẩu <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="password" name="confirmPassword" id="confirmPassword" required autocomplete="new-password" placeholder="Nhập lại mật khẩu">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Họ và tên <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" name="name" id="name" required autocomplete="name" placeholder="Nguyễn Văn A">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Số điện thoại <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <input type="tel" name="phone" id="phone" required autocomplete="tel" placeholder="0912345678">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>CCCD/CMND <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <input type="text" name="identityCard" id="identityCard" required placeholder="001234567890">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Địa chỉ</label>
+          <div class="input-wrapper">
+            <input type="text" name="address" id="address" autocomplete="street-address" placeholder="123 Đường ABC, Quận XYZ">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">Đăng ký</button>
+      </form>
+
+      <div class="links">
+        Đã có tài khoản? <a href="/login">Đăng nhập ngay</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const alertBox = document.getElementById('alertBox');
+
+    function showAlert(message, type) {
+      alertBox.innerHTML = `<div class="alert ${type}">${message}</div>`;
+      setTimeout(() => { alertBox.innerHTML = ''; }, 5000);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const identityCard = document.getElementById('identityCard').value.trim();
+      const address = document.getElementById('address').value.trim();
+
+      // Validation
+      if (!email || !password || !confirmPassword || !name || !phone || !identityCard) {
+        showAlert('❌ Vui lòng điền đầy đủ các trường bắt buộc!', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showAlert('❌ Mật khẩu phải có ít nhất 6 ký tự!', 'error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showAlert('❌ Mật khẩu xác nhận không khớp!', 'error');
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showAlert('❌ Email không hợp lệ!', 'error');
+        return;
+      }
+
+      // Phone validation (10-11 digits)
+      const phoneRegex = /^[0-9]{10,11}$/;
+      if (!phoneRegex.test(phone)) {
+        showAlert('❌ Số điện thoại không hợp lệ (10-11 số)!', 'error');
+        return;
+      }
+
+      // Identity card validation (9 or 12 digits)
+      const idRegex = /^[0-9]{9}$|^[0-9]{12}$/;
+      if (!idRegex.test(identityCard)) {
+        showAlert('❌ CCCD/CMND không hợp lệ (9 hoặc 12 số)!', 'error');
+        return;
+      }
+
+      // Submit
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Đang xử lý...';
+
+      // Generate UserCode from email
+      const userCode = 'USER' + Date.now().toString().slice(-8);
+
+      try {
+        const response = await fetch('/api/account/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            UserCode: userCode,
+            UserEmail: email,
+            UserPhone: phone,
+            UserPassword: password,
+            Name: name,
+            IdentityCard: identityCard,
+            UserAddress: address || ''
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert('✅ Đăng ký thành công! Đang chuyển đến trang đăng nhập...', 'success');
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 1500);
+        } else {
+          showAlert(`❌ ${data.message || 'Đăng ký thất bại!'}`, 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Đăng ký';
+        }
+      } catch (error) {
+        console.error('Register error:', error);
+        showAlert('❌ Lỗi kết nối! Vui lòng thử lại sau.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Đăng ký';
+      }
+    });
+  </script>
+</body>
+</html>

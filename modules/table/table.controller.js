@@ -1,27 +1,43 @@
 const Table = require('../../models/Table');
+const { Account } = require('../../models/Account');
 
 exports.createTable = async (req, res) => {
     try {
+        const userId = req.user?.id || req.user?._id;
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized: Missing user info' });
+        }
+
+        const account = await Account.findById(userId);
+        if (!account || account.UserRole !== 'Manager') {
+            return res.status(403).json({ message: 'Forbidden: Managers only' });
+        }
+
         const { NumberOfSeats, FloorNumber } = req.body;
 
-        const existingTable = await Table.findOne({ FloorNumber });
+        if (!NumberOfSeats || !FloorNumber) {
+            return res.status(400).json({ message: 'Missing NumberOfSeats or FloorNumber' });
+        }
 
+        const existingTable = await Table.findOne({ FloorNumber });
         if (existingTable) {
             return res.status(400).json({ message: 'Table with the same FloorNumber already exists' });
         }
 
-        const newTable = new Table({
-            NumberOfSeats,
-            FloorNumber
-        });
-
+        const newTable = new Table({ NumberOfSeats, FloorNumber });
         await newTable.save();
-        res.status(201).json({ message: 'Table created successfully', table: newTable });
 
+        res.status(201).json({
+            message: 'Table created successfully',
+            table: newTable
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Error creating table', error });
+        console.error('Error creating table:', error);
+        res.status(500).json({ message: 'Error creating table', error: error.message });
     }
-}
+};
+
 
 exports.getTables = async (req, res) => {
     try {
@@ -47,6 +63,17 @@ exports.getTableById = async (req, res) => {
 
 exports.updateTable = async (req, res) => {
     try {
+        const userId = req.user?.id || req.user?._id;
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized: Missing user info' });
+        }
+
+        const account = await Account.findById(userId);
+        if (!account || account.UserRole !== 'Manager') {
+            return res.status(403).json({ message: 'Forbidden: Managers only' });
+        }
+
         const { id } = req.params;
         const { NumberOfSeats, FloorNumber, TableStatus, IsDeleted } = req.body;
 
@@ -69,6 +96,17 @@ exports.updateTable = async (req, res) => {
 
 exports.deleteTable = async (req, res) => {
     try {
+        const userId = req.user?.id || req.user?._id;
+
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized: Missing user info' });
+        }
+
+        const account = await Account.findById(userId);
+        if (!account || account.UserRole !== 'Manager') {
+            return res.status(403).json({ message: 'Forbidden: Managers only' });
+        }
+
         const { id } = req.params;
         const table = await Table.findById(id);
         if (!table) {

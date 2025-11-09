@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Đăng nhập - Restaurant System</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f7ff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .login-card {
+      background:#fff;
+      width:100%;
+      max-width:420px;
+      border-radius:12px;
+      box-shadow:0 4px 12px rgba(59,130,246,0.1);
+      overflow:hidden;
+    }
+    .header {
+      background:#3b82f6;
+      padding:28px 24px;
+      text-align:center;
+      color:#fff;
+    }
+    .header h1 {
+      font-size:24px;
+      font-weight:600;
+      margin-bottom:4px;
+    }
+    .header p {
+      font-size:14px;
+      opacity:0.95;
+    }
+    .form-container {
+      padding:28px 24px;
+    }
+    .form-group {
+      margin-bottom:18px;
+    }
+    .form-group label {
+      display:block;
+      font-size:14px;
+      font-weight:500;
+      color:#374151;
+      margin-bottom:6px;
+    }
+    .input-wrapper input {
+      width:100%;
+      padding:11px 14px;
+      font-size:15px;
+      border:1px solid #d1d5db;
+      border-radius:6px;
+      transition: border-color 0.2s;
+    }
+    .input-wrapper input:focus {
+      outline:none;
+      border-color:#3b82f6;
+    }
+    .btn-submit {
+      width:100%;
+      padding:12px;
+      font-size:15px;
+      font-weight:600;
+      color:#fff;
+      background:#3b82f6;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      margin-top:8px;
+    }
+    .btn-submit:hover:not(:disabled) {
+      background:#2563eb;
+    }
+    .btn-submit:disabled {
+      opacity:0.6;
+      cursor:not-allowed;
+    }
+    .links {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:14px;
+      font-size:13px;
+    }
+    .links a {
+      color:#3b82f6;
+      text-decoration:none;
+    }
+    .links a:hover {
+      text-decoration:underline;
+    }
+    .divider {
+      margin:20px 0;
+      text-align:center;
+      position:relative;
+    }
+    .divider::before {
+      content:'';
+      position:absolute;
+      left:0;
+      top:50%;
+      width:100%;
+      height:1px;
+      background:#e5e7eb;
+    }
+    .divider span {
+      position:relative;
+      background:#fff;
+      padding:0 10px;
+      color:#9ca3af;
+      font-size:13px;
+    }
+    .test-info {
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      border-radius:6px;
+      padding:12px;
+      margin-top:14px;
+    }
+    .test-info p {
+      font-size:13px;
+      color:#1e40af;
+      line-height:1.5;
+    }
+    .test-info strong {
+      color:#1e3a8a;
+    }
+    .alert {
+      padding:10px 12px;
+      border-radius:6px;
+      margin-bottom:14px;
+      font-size:14px;
+    }
+    .alert.error {
+      background:#fee;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+    .alert.success {
+      background:#f0fdf4;
+      color:#166534;
+      border:1px solid #bbf7d0;
+    }
+    .btn-google {
+      width:100%;
+      padding:12px;
+      font-size:15px;
+      font-weight:600;
+      color:#444;
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:6px;
+      cursor:pointer;
+      margin-top:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+    .btn-google:hover {
+      background:#f9fafb;
+      border-color:#3b82f6;
+    }
+    .btn-google img {
+      width:20px;
+      height:20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="header">
+      <h1>🍽️ Restaurant System</h1>
+      <p>Chào mừng bạn quay trở lại</p>
+    </div>
+
+    <div class="form-container">
+      <div id="message" aria-live="polite"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <div class="input-wrapper">
+            <input 
+              id="email" 
+              name="email" 
+              type="email" 
+              placeholder="Nhập email của bạn" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <div class="input-wrapper">
+            <input 
+              id="password" 
+              name="password" 
+              type="password" 
+              placeholder="Nhập mật khẩu" 
+              required 
+              minlength="6"
+              autocomplete="current-password"
+            />
+          </div>
+        </div>
+
+        <button id="submitBtn" type="submit" class="btn-submit">
+          Đăng nhập
+        </button>
+
+        <div class="links">
+          <a href="/register">Đăng ký tài khoản</a>
+          <a href="/reset-password">Quên mật khẩu?</a>
+        </div>
+      </form>
+
+      <div class="divider">
+        <span>hoặc</span>
+      </div>
+
+      <div id="googleButtonContainer"></div>
+      <button class="btn-google" id="googleSignInBtn" style="display:none;">
+        <svg width="20" height="20" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg>
+        Đăng nhập bằng Google
+      </button>
+
+      <div class="divider">
+        <span>Tài khoản demo</span>
+      </div>
+
+      <div class="test-info">
+        <p>
+          <strong>Email:</strong> manager@gmail.com<br>
+          <strong>Password:</strong> 123456
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global function for showing messages
+    function showMessage(text, type){
+      const msgEl = document.getElementById('message');
+      msgEl.innerHTML = '';
+      if(!text) return;
+      const div = document.createElement('div');
+      div.className = 'alert ' + type;
+      div.textContent = text;
+      msgEl.appendChild(div);
+    }
+
+    (function(){
+      const form = document.getElementById('loginForm');
+      const submitBtn = document.getElementById('submitBtn');
+
+      form.addEventListener('submit', async function(e){
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang xử lý...';
+        showMessage('Đang đăng nhập...', 'success');
+
+        const payload = {
+          email: form.email.value.trim(),
+          password: form.password.value
+        };
+
+        try{
+          const res = await fetch('/api/account/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+          
+          if(!res.ok || !data.success){
+            showMessage(data.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Đăng nhập';
+            return;
+          }
+
+          // Save token and user info to localStorage
+          if (data.data && data.data.token) {
+            try { 
+              localStorage.setItem('token', data.data.token);
+              localStorage.setItem('user', JSON.stringify(data.data.user));
+            } catch(e){}
+          }
+
+          showMessage('✅ Đăng nhập thành công! Đang chuyển hướng...', 'success');
+          
+          // Redirect based on user role
+          setTimeout(function(){
+            const user = data.data.user;
+            if(user && user.UserRole === 'Manager') {
+              location.href = '/manager/dashboard';
+            } else {
+              location.href = '/menu';
+            }
+          }, 1000);
+        } catch(err){
+          showMessage('❌ Lỗi kết nối. Vui lòng thử lại sau.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Đăng nhập';
+        }
+      });
+    })();
+    // Google Sign-In
+    function handleGoogleCredential(response) {
+      const credential = response.credential;
+      console.log('[Google] Credential received');
+      
+      // Send to backend
+      fetch('/api/account/google-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential })
+      })
+      .then(res => {
+        console.log('[Google] Response status:', res.status);
+        return res.json();
+      })
+      .then(data => {
+        console.log('[Google] Backend response:', data);
+        
+        if (data.success) {
+          // Save token and user info
+          localStorage.setItem('token', data.data.token);
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+          console.log('[Google] Token saved:', !!localStorage.getItem('token'));
+          console.log('[Google] User role:', data.data.user.UserRole);
+          
+          showMessage('✅ Đăng nhập Google thành công! Đang chuyển hướng...', 'success');
+          
+          setTimeout(() => {
+            const user = data.data.user;
+            const targetUrl = user.UserRole === 'Manager' ? '/manager/dashboard' : '/menu';
+            console.log('[Google] Redirecting to:', targetUrl);
+            window.location.href = targetUrl;
+          }, 1000);
+        } else {
+          console.error('[Google] Login failed:', data.message);
+          showMessage('❌ ' + (data.message || 'Đăng nhập Google thất bại!'), 'error');
+        }
+      })
+      .catch(error => {
+        console.error('[Google] Error:', error);
+        showMessage('❌ Lỗi kết nối! Vui lòng thử lại sau.', 'error');
+      });
+    }
+
+    // Load Google Sign-In library
+    window.onload = function() {
+      // Load Google library
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+
+      script.onload = function() {
+        // Initialize Google Sign-In
+        google.accounts.id.initialize({
+          client_id: '1072113088889-8rhlg45h6lvt3ns5s5976g95httlf325.apps.googleusercontent.com', // Thay bằng Client ID của bạn
+          callback: handleGoogleCredential
+        });
+
+        // Render button
+        google.accounts.id.renderButton(
+          document.getElementById('googleButtonContainer'),
+          { 
+            theme: 'outline', 
+            size: 'large',
+            width: '100%',
+            text: 'signin_with',
+            locale: 'vi'
+          }
+        );
+      };
+    };
+  </script>
+</body>
+</html>

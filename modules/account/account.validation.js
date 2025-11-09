@@ -1,4 +1,6 @@
 const { body, validationResult } = require('express-validator');
+const { ACCOUNT_ROLES } = require('../../models/Account'); // <-- added
+
 
 // Middleware để kiểm tra kết quả validation
 const validate = (req, res, next) => {
@@ -143,9 +145,45 @@ const validateChangePassword = [
     validate
 ];
 
+// ---------- VALIDATION MỚI CHO TẠO STAFF ----------
+const validateCreateStaff = [
+    body('UserCode')
+        .notEmpty().withMessage('Mã người dùng không được để trống')
+        .trim()
+        .isLength({ min: 3, max: 20 }).withMessage('Mã người dùng phải từ 3 đến 20 ký tự'),
+    body('UserEmail')
+        .notEmpty().withMessage('Email không được để trống')
+        .isEmail().withMessage('Email không hợp lệ')
+        .normalizeEmail().toLowerCase(),
+    body('UserPassword')
+        .notEmpty().withMessage('Mật khẩu không được để trống')
+        .isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
+    body('Name')
+        .notEmpty().withMessage('Tên không được để trống')
+        .trim()
+        .isLength({ min: 2, max: 100 }).withMessage('Tên phải từ 2 đến 100 ký tự'),
+    body('UserRole')
+        .notEmpty().withMessage('UserRole không được để trống')
+        .isIn([ACCOUNT_ROLES[3], ACCOUNT_ROLES[4]]) // [ 'Waiter', 'Kitchen staff' ]
+        .withMessage('UserRole phải là "Waiter" hoặc "Kitchen staff"'),
+    body('UserPhone')
+        .optional({ checkFalsy: true }) // Cho phép rỗng hoặc undefined
+        .isString().withMessage('Số điện thoại phải là chuỗi')
+        .trim()
+        .matches(/^[0-9]{10,11}$/).withMessage('Số điện thoại phải có 10-11 chữ số'),
+    body('IdentityCard')
+        .optional({ checkFalsy: true })
+        .isString().withMessage('CMND/CCCD phải là chuỗi')
+        .trim()
+        .matches(/^[0-9]{9,12}$/).withMessage('CMND/CCCD phải có 9-12 chữ số'),
+    validate
+];
+// ----------------------------------------------------
+
 module.exports = {
     validateRegister,
     validateLogin,
     validateUpdateProfile,
-    validateChangePassword
+    validateChangePassword,
+    validateCreateStaff // ⚡ Export validation mới
 };

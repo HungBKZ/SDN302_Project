@@ -6,7 +6,8 @@ const {
     validateRegister,
     validateLogin,
     validateUpdateProfile,
-    validateChangePassword
+    validateChangePassword,
+    validateCreateStaff
 } = require('./account.validation');
 
 /**
@@ -65,4 +66,45 @@ router.put('/profile', auth, validateUpdateProfile, accountController.updateProf
  */
 router.put('/change-password', auth, validateChangePassword, accountController.changePassword);
 
+
+/* ---------- New features - Nhu (ĐÃ THÊM ROUTES) ---------- */
+
+/**
+ * @route   DELETE /api/account/me
+ * @desc    Customer tự vô hiệu hóa tài khoản
+ * @access  Private (Customer only, check trong controller)
+ */
+router.delete('/me', auth, accountController.selfDelete);
+
+/**
+ * @route   POST /api/account/staff
+ * @desc    Admin/Manager tạo tài khoản nhân viên
+ * @access  Private (Admin/Manager, check trong controller)
+ */
+router.post('/staff', auth, validateCreateStaff, accountController.createStaffAccount);
+
+/**
+ * @route   GET /api/account/list
+ * @desc    Admin/Manager lấy danh sách tài khoản
+ * @access  Private (Admin/Manager, check trong controller)
+ */
+router.get('/list', auth, accountController.listAccounts);
+
+/**
+D* @route   GET /api/account/:id
+ * @desc    Admin/Manager lấy chi tiết 1 tài khoản
+ * @access  Private (Admin/Manager, check trong controller)
+ */
+router.get('/:id', auth, accountController.getAccountDetails);
+
+/**
+ * @route   DELETE /api/account/:id
+ * @desc    Admin/Manager vô hiệu hóa 1 tài khoản
+ * @access  Private (Admin/Manager, check trong controller)
+ */
+router.delete('/:id', auth, accountController.softDeleteAccount);
+
+
 module.exports = router;
+
+

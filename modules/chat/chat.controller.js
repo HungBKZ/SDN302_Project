@@ -69,6 +69,15 @@ class ChatController {
 
             const message = await chatService.sendMessage(userId, receiverId, content);
 
+            // Emit via socket if possible (optional - loaders/socket exposes sendToUser)
+            try {
+                const socketLoader = require('../../loaders/socket');
+                const rid = (message.ReceiverId && message.ReceiverId._id) ? String(message.ReceiverId._id) : String(message.ReceiverId);
+                socketLoader.sendToUser(rid, 'message', message);
+            } catch (e) {
+                // ignore if socket loader not available
+            }
+
             return res.status(201).json({
                 success: true,
                 message: 'Gửi tin nhắn thành công',

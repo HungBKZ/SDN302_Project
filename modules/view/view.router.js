@@ -82,4 +82,12 @@ router.get('/manager/dashboard', (req, res) => {
     res.render('manager-dashboard');
 });
 
+/**
+ * @route GET /chat
+ * @desc  Render chat page (basic realtime UI)
+ */
+router.get('/chat', (req, res) => {
+    res.render('chat');
+});
+
 module.exports = router;

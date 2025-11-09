@@ -11,24 +11,24 @@ class AccountService {
      */
     async register(userData) {
         // Kiểm tra email đã tồn tại
-        const existingEmail = await Account.findOne({ 
-            UserEmail: userData.UserEmail.toLowerCase() 
+        const existingEmail = await Account.findOne({
+            UserEmail: userData.UserEmail.toLowerCase()
         });
         if (existingEmail) {
             throw new Error('Email đã được sử dụng');
         }
 
         // Kiểm tra UserCode đã tồn tại
-        const existingUserCode = await Account.findOne({ 
-            UserCode: userData.UserCode 
+        const existingUserCode = await Account.findOne({
+            UserCode: userData.UserCode
         });
         if (existingUserCode) {
             throw new Error('Mã người dùng đã được sử dụng');
         }
 
         // Kiểm tra số điện thoại đã tồn tại
-        const existingPhone = await Account.findOne({ 
-            UserPhone: userData.UserPhone 
+        const existingPhone = await Account.findOne({
+            UserPhone: userData.UserPhone
         });
         if (existingPhone) {
             throw new Error('Số điện thoại đã được sử dụng');
@@ -72,9 +72,9 @@ class AccountService {
      */
     async login(email, password) {
         // Tìm tài khoản theo email
-        const account = await Account.findOne({ 
+        const account = await Account.findOne({
             UserEmail: email.toLowerCase(),
-            IsDeleted: false 
+            IsDeleted: false
         });
 
         if (!account) {
@@ -118,7 +118,7 @@ class AccountService {
      */
     async getCurrentUser(userId) {
         const account = await Account.findById(userId).select('-UserPassword -IdentityCard');
-        
+
         if (!account) {
             throw new Error('Tài khoản không tồn tại');
         }
@@ -138,7 +138,7 @@ class AccountService {
      */
     async updateProfile(userId, updateData) {
         const account = await Account.findById(userId);
-        
+
         if (!account) {
             throw new Error('Tài khoản không tồn tại');
         }
@@ -149,7 +149,7 @@ class AccountService {
 
         // Các field được phép cập nhật
         const allowedUpdates = ['Name', 'UserPhone', 'UserAddress', 'UserImage'];
-        
+
         allowedUpdates.forEach(field => {
             if (updateData[field] !== undefined) {
                 account[field] = updateData[field];
@@ -176,7 +176,7 @@ class AccountService {
      */
     async changePassword(userId, oldPassword, newPassword) {
         const account = await Account.findById(userId);
-        
+
         if (!account) {
             throw new Error('Tài khoản không tồn tại');
         }
@@ -207,16 +207,16 @@ class AccountService {
         const { sub: googleId, email, name, picture } = googleProfile;
 
         // Tìm tài khoản theo GoogleId
-        let account = await Account.findOne({ 
+        let account = await Account.findOne({
             GoogleId: googleId,
-            IsDeleted: false 
+            IsDeleted: false
         });
 
         // Nếu chưa có, tìm theo email
         if (!account) {
-            account = await Account.findOne({ 
+            account = await Account.findOne({
                 UserEmail: email.toLowerCase(),
-                IsDeleted: false 
+                IsDeleted: false
             });
         }
 
@@ -278,6 +278,106 @@ class AccountService {
             user: userData
         };
     }
+
+    /* ---------- New features - Nhu (ĐÃ HOÀN THIỆN) ---------- */
+
+    /**
+     * Tự vô hiệu hóa tài khoản (Customer)
+     */
+    async selfDelete(userId) {
+        const account = await Account.findOneAndUpdate(
+            { _id: userId, IsDeleted: false, UserRole: ACCOUNT_ROLES[5] /* Customer */ },
+            { IsDeleted: true, UpdatedAt: new Date() }
+        );
+        if (!account) {
+            throw new Error('Tài khoản không tồn tại hoặc không thể xóa');
+        }
+        return true;
+    }
+
+    /**
+     * Tạo tài khoản nhân viên (Admin/Manager)
+     */
+    async createStaffAccount(staffData) {
+        const { UserCode, UserEmail, UserPassword, Name, UserPhone, UserRole, IdentityCard, UserAddress, UserImage } = staffData;
+
+        // uniqueness checks
+        const existEmail = await Account.findOne({ UserEmail: UserEmail.toLowerCase() });
+        if (existEmail) throw new Error('Email đã được sử dụng');
+        const existCode = await Account.findOne({ UserCode });
+        if (existCode) throw new Error('Mã người dùng đã được sử dụng');
+        if (UserPhone && UserPhone.length > 0) {
+            const existPhone = await Account.findOne({ UserPhone });
+            if (existPhone) throw new Error('Số điện thoại đã được sử dụng');
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(UserPassword, salt);
+
+        const account = new Account({
+            UserCode,
+            UserEmail: UserEmail.toLowerCase(),
+            UserPhone: UserPhone || '',
+            UserPassword: hashed,
+            Name,
+            UserRole, // Validation sẽ check (Waiter, Kitchen staff)
+            IdentityCard: IdentityCard || '',
+            UserAddress: UserAddress || '',
+            UserImage: UserImage || 'default-avatar.jpg',
+            IsDeleted: false,
+            CreatedAt: new Date(),
+            UpdatedAt: new Date()
+        });
+
+        await account.save();
+
+        const out = account.toObject();
+        delete out.UserPassword;
+        delete out.GoogleId;
+        return out;
+    }
+
+    /**
+     * Lấy danh sách tài khoản (Admin/Manager)
+     */
+    async listAccounts() {
+        const accounts = await Account.find({ IsDeleted: false })
+            .select('-UserPassword -GoogleId -IdentityCard -UserEmail -UserCode')
+            .lean();
+        return accounts;
+    }
+
+    /**
+     * Lấy chi tiết 1 tài khoản (Admin/Manager)
+     */
+    async getAccountDetails(accountId) {
+        const acc = await Account.findById(accountId)
+            .select('-UserPassword -GoogleId -IdentityCard') // Vẫn lấy UserCode, Email
+            .lean();
+
+        if (!acc || acc.IsDeleted) {
+            throw new Error('Tài khoản không tồn tại');
+        }
+        return acc;
+    }
+
+    /**
+     * Vô hiệu hóa tài khoản (Admin/Manager)
+     */
+    async softDeleteAccount(accountId) {
+        const updated = await Account.findOneAndUpdate(
+            { _id: accountId, IsDeleted: false },
+            { IsDeleted: true, UpdatedAt: new Date() },
+            { new: true }
+        );
+
+        if (!updated) {
+            throw new Error('Tài khoản không tồn tại hoặc đã bị xóa');
+        }
+        return true;
+    }
+
 }
 
 module.exports = new AccountService();
+

@@ -1,4 +1,50 @@
 const accountService = require('./account.service');
+const { Account } = require('../../models/Account');
+
+/* ---------- Helper Functions (ĐÃ CHUYỂN RA NGOÀI CLASS) ---------- */
+
+/**
+ * helper: check admin/manager
+ */
+async function _checkManagerOrAdmin(req, res) {
+    const userId = req.user?._id || req.user?.id;
+    if (!userId) {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+        return null;
+    }
+    // Phải dùng Account model trực tiếp
+    const acc = await Account.findById(userId);
+    if (!acc || !['Admin', 'Manager'].includes(acc.UserRole) || acc.IsDeleted) {
+        res.status(403).json({ success: false, message: 'Forbidden: Admin or Manager only' });
+        return null;
+    }
+    return acc;
+}
+
+/**
+ * helper: check customer (self-delete)
+ */
+async function _checkCustomerSelf(req, res) {
+    const userId = req.user?._id || req.user?.id;
+    if (!userId) {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+        return null;
+    }
+    const acc = await Account.findById(userId);
+    if (!acc) {
+        res.status(404).json({ success: false, message: 'Tài khoản không tồn tại' });
+        return null;
+    }
+    if (acc.IsDeleted) {
+        res.status(400).json({ success: false, message: 'Tài khoản đã bị xóa' });
+        return null;
+    }
+    if (acc.UserRole !== 'Customer') {
+        res.status(403).json({ success: false, message: 'Chỉ Customer mới được xóa tài khoản tự phục vụ' });
+        return null;
+    }
+    return acc;
+}
 
 class AccountController {
     /**
@@ -16,7 +62,7 @@ class AccountController {
                 data: newAccount
             });
         } catch (error) {
-            if (error.message === 'Email đã được sử dụng' || 
+            if (error.message === 'Email đã được sử dụng' ||
                 error.message === 'Mã người dùng đã được sử dụng' ||
                 error.message === 'Số điện thoại đã được sử dụng') {
                 return res.status(409).json({
@@ -61,7 +107,7 @@ class AccountController {
         try {
             // Với JWT, logout chủ yếu xử lý ở client (xóa token)
             // Server có thể log hoặc thêm token vào blacklist nếu cần
-            
+
             return res.status(200).json({
                 success: true,
                 message: 'Đăng xuất thành công'
@@ -86,7 +132,7 @@ class AccountController {
                 data: user
             });
         } catch (error) {
-            if (error.message === 'Tài khoản không tồn tại' || 
+            if (error.message === 'Tài khoản không tồn tại' ||
                 error.message === 'Tài khoản đã bị xóa') {
                 return res.status(404).json({
                     success: false,
@@ -113,7 +159,7 @@ class AccountController {
                 data: updatedUser
             });
         } catch (error) {
-            if (error.message === 'Tài khoản không tồn tại' || 
+            if (error.message === 'Tài khoản không tồn tại' ||
                 error.message === 'Tài khoản đã bị xóa') {
                 return res.status(404).json({
                     success: false,
@@ -132,7 +178,7 @@ class AccountController {
         try {
             const userId = req.user._id;
             const { oldPassword, newPassword } = req.body;
-            
+
             await accountService.changePassword(userId, oldPassword, newPassword);
 
             return res.status(200).json({
@@ -194,6 +240,123 @@ class AccountController {
                 success: false,
                 message: 'Đăng nhập Google thất bại'
             });
+        }
+    }
+
+    /* ---------- New features - Nhu (ĐÃ TÁI CẤU TRÚC) ---------- */
+
+    /**
+     * DELETE /api/account/me
+     * Self soft-delete (Customer only)
+     */
+    async selfDelete(req, res, next) {
+        try {
+            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
+            const acc = await _checkCustomerSelf(req, res);
+            if (!acc) return;
+
+            await accountService.selfDelete(acc._id);
+            return res.status(200).json({ success: true, message: 'Tài khoản đã bị vô hiệu hóa' });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /api/account/staff
+     * Create staff account (Manager or Admin)
+     */
+    async createStaffAccount(req, res, next) {
+        try {
+            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
+            const admin = await _checkManagerOrAdmin(req, res);
+            if (!admin) return;
+
+            const newStaffAccount = await accountService.createStaffAccount(req.body);
+
+            return res.status(201).json({
+                success: true,
+                message: 'Tạo tài khoản nhân viên thành công',
+                data: newStaffAccount
+            });
+        } catch (error) {
+            // Xử lý lỗi trùng lặp từ service
+            if (error.message === 'Email đã được sử dụng' ||
+                error.message === 'Mã người dùng đã được sử dụng' ||
+                error.message === 'Số điện thoại đã được sử dụng') {
+                return res.status(409).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            next(error);
+        }
+    }
+
+    /**
+     * GET /api/account/list
+     * List accounts (Admin/Manager)
+     */
+    async listAccounts(req, res, next) {
+        try {
+            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
+            const admin = await _checkManagerOrAdmin(req, res);
+            if (!admin) return;
+
+            const accounts = await accountService.listAccounts();
+            return res.status(200).json({ success: true, data: accounts });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * GET /api/account/:id
+     * Get account details (Admin/Manager)
+     */
+    async getAccountDetails(req, res, next) {
+        try {
+            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
+            const admin = await _checkManagerOrAdmin(req, res);
+            if (!admin) return;
+
+            const { id } = req.params;
+            const acc = await accountService.getAccountDetails(id);
+
+            return res.status(200).json({ success: true, data: acc });
+            _
+        } catch (error) {
+            if (error.message === 'Tài khoản không tồn tại') {
+                return res.status(404).json({ success: false, message: error.message });
+            }
+            next(error);
+        }
+    }
+
+    /**
+     * DELETE /api/account/:id
+     * Soft delete account (Admin/Manager)
+     */
+    async softDeleteAccount(req, res, next) {
+        try {
+            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
+            const admin = await _checkManagerOrAdmin(req, res);
+            if (!admin) return;
+
+            const { id } = req.params;
+
+            // Không cho admin tự xóa mình bằng API này
+            if (admin._id.toString() === id) {
+                return res.status(400).json({ success: false, message: 'Không thể tự xóa tài khoản của mình.' });
+            }
+
+            await accountService.softDeleteAccount(id);
+            return res.status(200).json({ success: true, message: 'Tài khoản đã được vô hiệu hóa' });
+        } catch (error) {
+            if (error.message === 'Tài khoản không tồn tại hoặc đã bị xóa') {
+                return res.status(404).json({ success: false, message: error.message });
+            }
+            next(error);
         }
     }
 }

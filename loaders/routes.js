@@ -10,9 +10,11 @@ const tableRouter = require('../modules/table/table.router');
 const cartRouter = require('../modules/cart/cart.router');
 const reservationRouter = require('../modules/reservation/reservation.router');
 const couponRouter = require('../modules/coupon/coupon.router');
+const rewardRouter = require('../modules/reward/reward.router');
 const incidentReportRouter = require('../modules/incidentReport/incidentReport.router');
 const paymentRouter = require('../modules/payment/payment.controller.router');
 const orderDetailRouter = require('../modules/orderDetail/orderDetail.router');
+const chatRouter = require('../modules/chat/chat.router');
 // const authRouter = require('../modules/auth/auth.router');
 // const orderRouter = require('../modules/order/order.router');
 
@@ -33,9 +35,11 @@ const initRoutes = (app) => {
     app.use('/api/cart', cartRouter);
     app.use('/api/reservations', reservationRouter);
     app.use('/api/coupons', couponRouter);
+    app.use('/api/reward', rewardRouter);
     app.use('/api/incidents', incidentReportRouter);
     app.use('/api/payments', paymentRouter);
     app.use('/api/order-details', orderDetailRouter);
+    app.use('/api/chat', chatRouter);
 
     // Uncomment khi đã có router tương ứng
     // app.use('/api/auth', authRouter);

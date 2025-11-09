@@ -292,6 +292,105 @@ class AccountService {
 
         return account;
     }
+    /* ---------- New features - Nhu (ĐÃ HOÀN THIỆN) ---------- */
+
+    /**
+     * Tự vô hiệu hóa tài khoản (Customer)
+     */
+    async selfDelete(userId) {
+        const account = await Account.findOneAndUpdate(
+            { _id: userId, IsDeleted: false, UserRole: ACCOUNT_ROLES[5] /* Customer */ },
+            { IsDeleted: true, UpdatedAt: new Date() }
+        );
+        if (!account) {
+            throw new Error('Tài khoản không tồn tại hoặc không thể xóa');
+        }
+        return true;
+    }
+
+    /**
+     * Tạo tài khoản nhân viên (Admin/Manager)
+     */
+    async createStaffAccount(staffData) {
+        const { UserCode, UserEmail, UserPassword, Name, UserPhone, UserRole, IdentityCard, UserAddress, UserImage } = staffData;
+
+        // uniqueness checks
+        const existEmail = await Account.findOne({ UserEmail: UserEmail.toLowerCase() });
+        if (existEmail) throw new Error('Email đã được sử dụng');
+        const existCode = await Account.findOne({ UserCode });
+        if (existCode) throw new Error('Mã người dùng đã được sử dụng');
+        if (UserPhone && UserPhone.length > 0) {
+            const existPhone = await Account.findOne({ UserPhone });
+            if (existPhone) throw new Error('Số điện thoại đã được sử dụng');
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(UserPassword, salt);
+
+        const account = new Account({
+            UserCode,
+            UserEmail: UserEmail.toLowerCase(),
+            UserPhone: UserPhone || '',
+            UserPassword: hashed,
+            Name,
+            UserRole, // Validation sẽ check (Waiter, Kitchen staff)
+            IdentityCard: IdentityCard || '',
+            UserAddress: UserAddress || '',
+            UserImage: UserImage || 'default-avatar.jpg',
+            IsDeleted: false,
+            CreatedAt: new Date(),
+            UpdatedAt: new Date()
+        });
+
+        await account.save();
+
+        const out = account.toObject();
+        delete out.UserPassword;
+        delete out.GoogleId;
+        return out;
+    }
+
+    /**
+     * Lấy danh sách tài khoản (Admin/Manager)
+     */
+    async listAccounts() {
+        const accounts = await Account.find({ IsDeleted: false })
+            .select('-UserPassword -GoogleId -IdentityCard -UserEmail -UserCode')
+            .lean();
+        return accounts;
+    }
+
+    /**
+     * Lấy chi tiết 1 tài khoản (Admin/Manager)
+     */
+    async getAccountDetails(accountId) {
+        const acc = await Account.findById(accountId)
+            .select('-UserPassword -GoogleId -IdentityCard') // Vẫn lấy UserCode, Email
+            .lean();
+
+        if (!acc || acc.IsDeleted) {
+            throw new Error('Tài khoản không tồn tại');
+        }
+        return acc;
+    }
+
+    /**
+     * Vô hiệu hóa tài khoản (Admin/Manager)
+     */
+    async softDeleteAccount(accountId) {
+        const updated = await Account.findOneAndUpdate(
+            { _id: accountId, IsDeleted: false },
+            { IsDeleted: true, UpdatedAt: new Date() },
+            { new: true }
+        );
+
+        if (!updated) {
+            throw new Error('Tài khoản không tồn tại hoặc đã bị xóa');
+        }
+        return true;
+    }
+
 }
 
 module.exports = new AccountService();
+

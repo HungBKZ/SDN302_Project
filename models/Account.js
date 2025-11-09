@@ -30,14 +30,20 @@ const accountSchema = new mongoose.Schema(
         },
         UserPhone: {
             type: String,
-            required: true,
-            trim: true
+            required: false, // Không bắt buộc cho Google login
+            trim: true,
+            default: ''
         },
         UserPassword: {
             type: String,
-            required: true,
+            required: false, // Không bắt buộc nếu đăng nhập bằng Google
             // minlength: 6,
             // select: false // Không trả về mặc định
+        },
+        GoogleId: {
+            type: String,
+            sparse: true, // Index nhưng cho phép null
+            unique: true
         },
         Name: {
             type: String,
@@ -51,8 +57,9 @@ const accountSchema = new mongoose.Schema(
         },
         IdentityCard: {
             type: String,
-            required: true,
+            required: false, // Không bắt buộc cho Google login
             trim: true,
+            default: ''
             // select: false // Ẩn mặc định
         },
         UserAddress: {

@@ -155,6 +155,47 @@ class AccountController {
             next(error);
         }
     }
+
+    /**
+     * POST /api/account/google-login
+     * Đăng nhập bằng Google
+     */
+    async googleLogin(req, res, next) {
+        try {
+            const { credential } = req.body;
+
+            if (!credential) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Thiếu Google credential'
+                });
+            }
+
+            // Decode Google JWT token
+            const base64Url = credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            const googleProfile = JSON.parse(jsonPayload);
+
+            // Xử lý đăng nhập
+            const result = await accountService.loginWithGoogle(googleProfile);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Đăng nhập bằng Google thành công',
+                data: result
+            });
+        } catch (error) {
+            console.error('Google login error:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Đăng nhập Google thất bại'
+            });
+        }
+    }
 }
 
 module.exports = new AccountController();

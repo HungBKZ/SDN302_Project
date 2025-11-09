@@ -446,13 +446,6 @@
 
     <div class="filter-bar">
       <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm món ăn...">
-      <select id="typeFilter">
-        <option value="">Tất cả loại món</option>
-        <option value="Appetizer">Khai vị</option>
-        <option value="Main Course">Món chính</option>
-        <option value="Dessert">Tráng miệng</option>
-        <option value="Beverage">Đồ uống</option>
-      </select>
       <select id="statusFilter">
         <option value="">Tất cả trạng thái</option>
         <option value="Available">Có sẵn</option>
@@ -719,11 +712,9 @@
       currentFilters = {};
       
       const search = document.getElementById('searchInput').value.trim();
-      const type = document.getElementById('typeFilter').value;
       const status = document.getElementById('statusFilter').value;
 
       if (search) currentFilters.search = search;
-      if (type) currentFilters.type = type;
       if (status) currentFilters.status = status;
 
       loadDishes(1);
@@ -732,7 +723,6 @@
     // Reset filters
     function resetFilters() {
       document.getElementById('searchInput').value = '';
-      document.getElementById('typeFilter').value = '';
       document.getElementById('statusFilter').value = '';
       currentFilters = {};
       loadDishes(1);

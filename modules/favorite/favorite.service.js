@@ -9,8 +9,11 @@ class FavoriteService {
      * @returns {Promise<Object>} Favorite vừa tạo
      */
     async addFavorite(userId, dishId) {
+        console.log('📌 Service addFavorite - UserId:', userId, 'DishId:', dishId);
+        
         // Kiểm tra món ăn có tồn tại không
         const dish = await Dish.findById(dishId);
+        console.log('🍽️ Dish found:', dish ? 'Yes' : 'No');
         if (!dish) {
             throw new Error('Món ăn không tồn tại');
         }
@@ -20,6 +23,7 @@ class FavoriteService {
             UserId: userId,
             DishId: dishId
         });
+        console.log('💾 Existing favorite:', existingFavorite ? 'Yes' : 'No');
 
         if (existingFavorite) {
             // Nếu đã tồn tại nhưng đã xóa (IsDeleted = 1), khôi phục lại

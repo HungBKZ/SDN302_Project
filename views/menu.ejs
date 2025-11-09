@@ -318,6 +318,9 @@
     <h1>🍽️ Menu - Danh sách món ăn</h1>
     <div class="user-info">
       <a href="/profile" class="user-link" id="userName">👤 Đang tải...</a>
+      <a href="/favorites" class="cart-icon">
+        ❤️ Yêu thích
+      </a>
       <a href="/cart" class="cart-icon" id="cartIcon">
         🛒 Giỏ hàng
         <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
@@ -401,13 +404,27 @@
       }
     }
 
+    // View dish detail
+    function viewDishDetail(dishId) {
+      window.location.href = `/dish-detail?id=${dishId}`;
+    }
+
     // Toggle favorite
-    async function toggleFavorite(dishId, button) {
+    async function toggleFavorite(dishId, button, event) {
+      // Stop propagation to prevent card click
+      if (event) {
+        event.stopPropagation();
+      }
+
+      button.disabled = true;
+
       try {
         const isFavorite = favorites.has(dishId);
-        const url = isFavorite ? `/api/favorite/remove/${dishId}` : '/api/favorite/add';
+        const url = isFavorite 
+          ? `http://127.0.0.1:1234/api/favorite/remove/${dishId}` 
+          : 'http://127.0.0.1:1234/api/favorite/add';
         const method = isFavorite ? 'DELETE' : 'POST';
-        const body = isFavorite ? undefined : JSON.stringify({ dishId });
+        const body = isFavorite ? undefined : JSON.stringify({ dishId: dishId });
 
         const response = await fetch(url, {
           method,
@@ -423,20 +440,22 @@
             favorites.delete(dishId);
             button.classList.remove('active');
             button.textContent = '🤍 Yêu thích';
-            showAlert('✅ Đã xóa khỏi danh sách yêu thích', 'success');
+            showAlert('✅ Đã bỏ yêu thích', 'success');
           } else {
             favorites.add(dishId);
             button.classList.add('active');
             button.textContent = '❤️ Đã thích';
-            showAlert('✅ Đã thêm vào danh sách yêu thích', 'success');
+            showAlert('✅ Đã thêm vào yêu thích', 'success');
           }
         } else {
           const data = await response.json();
-          showAlert(`❌ ${data.message}`, 'error');
+          showAlert(`❌ ${data.message || 'Lỗi thao tác'}`, 'error');
         }
       } catch (error) {
         console.error('Toggle favorite error:', error);
         showAlert('❌ Lỗi khi thao tác yêu thích!', 'error');
+      } finally {
+        button.disabled = false;
       }
     }
 
@@ -488,7 +507,7 @@
       container.innerHTML = `
         <div class="menu-grid">
           ${dishes.map(dish => `
-            <div class="dish-card">
+            <div class="dish-card" onclick="viewDishDetail('${dish._id}')" style="cursor: pointer;">
               <img src="${dish.DishImage || '/images/default-dish.jpg'}" alt="${dish.DishName}" class="dish-image" onerror="this.src='/images/default-dish.jpg'">
               <div class="dish-content">
                 <h3 class="dish-name">${dish.DishName}</h3>
@@ -504,10 +523,10 @@
                   </span>
                 </div>
                 <div class="dish-actions">
-                  <button class="btn-favorite ${favorites.has(dish._id) ? 'active' : ''}" onclick="toggleFavorite('${dish._id}', this)">
+                  <button class="btn-favorite ${favorites.has(dish._id) ? 'active' : ''}" onclick="toggleFavorite('${dish._id}', this, event)">
                     ${favorites.has(dish._id) ? '❤️ Đã thích' : '🤍 Yêu thích'}
                   </button>
-                  <button class="btn-order" ${dish.DishStatus !== 'Available' ? 'disabled' : ''} onclick='addToCart(${JSON.stringify(dish)})'>
+                  <button class="btn-order" ${dish.DishStatus !== 'Available' ? 'disabled' : ''} onclick='event.stopPropagation(); addToCart(${JSON.stringify(dish)})'>
                     🛒 Đặt món
                   </button>
                 </div>

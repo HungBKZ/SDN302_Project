@@ -265,6 +265,38 @@ class AccountController {
                     message: error.message
                 });
             }
+            next(error);
+        }
+    }
+
+    /**
+     * PUT /api/account/profile
+     * Cập nhật thông tin profile
+     */
+    async updateProfile(req, res, next) {
+        try {
+            const userId = req.user._id;
+            const updateData = req.body;
+            
+            const updatedProfile = await accountService.updateProfile(userId, updateData);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Cập nhật profile thành công',
+                data: updatedProfile
+            });
+        } catch (error) {
+            if (error.message === 'Không tìm thấy tài khoản' ||
+                error.message === 'Số điện thoại đã được sử dụng') {
+                return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            next(error);
+        }
+    }
+
     /* ---------- New features - Nhu (ĐÃ TÁI CẤU TRÚC) ---------- */
 
     /**
@@ -304,6 +336,15 @@ class AccountController {
             if (error.message === 'Không tìm thấy tài khoản' ||
                 error.message === 'Số điện thoại đã được sử dụng') {
                 return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            next(error);
+        }
+    }
+
+    /**
      * POST /api/account/staff
      * Create staff account (Manager or Admin)
      */

@@ -56,6 +56,24 @@ router.get('/profile', (req, res) => {
 });
 
 /**
+ * @route   GET /favorites
+ * @desc    Render trang món yêu thích
+ * @access  Public
+ */
+router.get('/favorites', (req, res) => {
+    res.render('favorites');
+});
+
+/**
+ * @route   GET /dish-detail
+ * @desc    Render trang chi tiết món ăn
+ * @access  Public
+ */
+router.get('/dish-detail', (req, res) => {
+    res.render('dish-detail');
+});
+
+/**
  * @route   GET /manager/dashboard
  * @desc    Render trang quản lý
  * @access  Manager only

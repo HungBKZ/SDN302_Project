@@ -39,7 +39,19 @@
       background:rgba(255,255,255,0.15);
       border-radius:6px;
     }
-    .navbar button {
+    .navbar .user-info a.user-link {
+      padding:8px 16px;
+      background:rgba(255,255,255,0.15);
+      border-radius:6px;
+      color:#fff;
+      text-decoration:none;
+      cursor:pointer;
+      transition: background 0.3s;
+    }
+    .navbar .user-info a.user-link:hover {
+      background:rgba(255,255,255,0.25);
+    }
+    .navbar button, .navbar .cart-icon {
       padding:8px 16px;
       background:#fff;
       color:#3b82f6;
@@ -48,9 +60,29 @@
       cursor:pointer;
       font-size:14px;
       font-weight:600;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      position:relative;
     }
-    .navbar button:hover {
+    .navbar button:hover, .navbar .cart-icon:hover {
       background:#f0f7ff;
+    }
+    .cart-badge {
+      position:absolute;
+      top:-8px;
+      right:-8px;
+      background:#ef4444;
+      color:#fff;
+      width:20px;
+      height:20px;
+      border-radius:50%;
+      font-size:11px;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
     .container {
       max-width:1200px;
@@ -285,7 +317,11 @@
   <div class="navbar">
     <h1>🍽️ Menu - Danh sách món ăn</h1>
     <div class="user-info">
-      <span id="userName">Đang tải...</span>
+      <a href="/profile" class="user-link" id="userName">👤 Đang tải...</a>
+      <a href="/cart" class="cart-icon" id="cartIcon">
+        🛒 Giỏ hàng
+        <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+      </a>
       <button onclick="logout()">Đăng xuất</button>
     </div>
   </div>
@@ -471,7 +507,7 @@
                   <button class="btn-favorite ${favorites.has(dish._id) ? 'active' : ''}" onclick="toggleFavorite('${dish._id}', this)">
                     ${favorites.has(dish._id) ? '❤️ Đã thích' : '🤍 Yêu thích'}
                   </button>
-                  <button class="btn-order" ${dish.DishStatus !== 'Available' ? 'disabled' : ''} onclick="orderDish('${dish._id}', '${dish.DishName}')">
+                  <button class="btn-order" ${dish.DishStatus !== 'Available' ? 'disabled' : ''} onclick='addToCart(${JSON.stringify(dish)})'>
                     🛒 Đặt món
                   </button>
                 </div>
@@ -527,10 +563,53 @@
       loadDishes(1);
     }
 
-    // Order dish (placeholder)
-    function orderDish(dishId, dishName) {
-      showAlert(`✅ Đã thêm "${dishName}" vào giỏ hàng!`, 'success');
-      // TODO: Implement order functionality
+    // Get cart from localStorage
+    function getCart() {
+      const cart = localStorage.getItem('cart');
+      return cart ? JSON.parse(cart) : [];
+    }
+
+    // Save cart to localStorage
+    function saveCart(cart) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartBadge();
+    }
+
+    // Update cart badge counter
+    function updateCartBadge() {
+      const cart = getCart();
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const badge = document.getElementById('cartBadge');
+      
+      if (totalItems > 0) {
+        badge.textContent = totalItems;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Add dish to cart
+    function addToCart(dish) {
+      const cart = getCart();
+      const existingItem = cart.find(item => item._id === dish._id);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+        showAlert(`✅ Đã tăng số lượng "${dish.DishName}" trong giỏ hàng!`, 'success');
+      } else {
+        cart.push({
+          _id: dish._id,
+          DishName: dish.DishName,
+          DishType: dish.DishType,
+          DishPrice: dish.DishPrice,
+          DishImage: dish.DishImage,
+          quantity: 1
+        });
+        showAlert(`✅ Đã thêm "${dish.DishName}" vào giỏ hàng!`, 'success');
+      }
+
+      saveCart(cart);
     }
 
     // Enter key to search
@@ -542,6 +621,7 @@
     (async function init() {
       await loadFavorites();
       await loadDishes(1);
+      updateCartBadge(); // Update cart badge on page load
     })();
   </script>
 </body>

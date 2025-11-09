@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const cartItemSchema = new mongoose.Schema(
@@ -34,6 +35,8 @@ const cartItemSchema = new mongoose.Schema(
     }
 );
 
+// Mỗi (CartId, DishId) chỉ có một dòng để tránh trùng món trong cùng giỏ
+cartItemSchema.index({ CartId: 1, DishId: 1 }, { unique: true });
 // // Mỗi (CartId, DishId) chỉ có một dòng để tránh trùng món trong cùng giỏ
 // cartItemSchema.index({ CartId: 1, DishId: 1 }, { unique: true });
 

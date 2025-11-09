@@ -11,6 +11,10 @@ dotenv.config();
 
 const app = express();
 
+// View engine setup
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // Middlewares
 app.use(express.json());
 app.use(cors());

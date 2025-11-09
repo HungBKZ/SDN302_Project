@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu - Danh sách món ăn</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f7ff;
+      min-height:100vh;
+      padding-bottom:40px;
+    }
+    .navbar {
+      background:#3b82f6;
+      color:#fff;
+      padding:16px 24px;
+      box-shadow:0 2px 8px rgba(59,130,246,0.2);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+    .navbar h1 {
+      font-size:22px;
+      font-weight:600;
+    }
+    .navbar .user-info {
+      display:flex;
+      align-items:center;
+      gap:16px;
+      font-size:14px;
+    }
+    .navbar .user-info span {
+      padding:8px 16px;
+      background:rgba(255,255,255,0.15);
+      border-radius:6px;
+    }
+    .navbar button {
+      padding:8px 16px;
+      background:#fff;
+      color:#3b82f6;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .navbar button:hover {
+      background:#f0f7ff;
+    }
+    .container {
+      max-width:1200px;
+      margin:0 auto;
+      padding:24px 20px;
+    }
+    .filter-bar {
+      background:#fff;
+      padding:20px;
+      border-radius:8px;
+      box-shadow:0 2px 8px rgba(59,130,246,0.1);
+      margin-bottom:24px;
+    }
+    .filter-row {
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .filter-row input, .filter-row select {
+      padding:10px 14px;
+      border:1px solid #d1d5db;
+      border-radius:6px;
+      font-size:14px;
+      min-width:200px;
+    }
+    .filter-row input:focus, .filter-row select:focus {
+      outline:none;
+      border-color:#3b82f6;
+    }
+    .filter-row button {
+      padding:10px 20px;
+      background:#3b82f6;
+      color:#fff;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .filter-row button:hover {
+      background:#2563eb;
+    }
+    .filter-row .btn-reset {
+      background:#6b7280;
+    }
+    .filter-row .btn-reset:hover {
+      background:#4b5563;
+    }
+    .menu-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+      gap:20px;
+    }
+    .dish-card {
+      background:#fff;
+      border-radius:8px;
+      overflow:hidden;
+      box-shadow:0 2px 8px rgba(59,130,246,0.1);
+      transition:transform 0.2s, box-shadow 0.2s;
+      cursor:pointer;
+      position:relative;
+    }
+    .dish-card:hover {
+      transform:translateY(-4px);
+      box-shadow:0 4px 16px rgba(59,130,246,0.2);
+    }
+    .dish-image {
+      width:100%;
+      height:180px;
+      object-fit:cover;
+      background:#e5e7eb;
+    }
+    .dish-content {
+      padding:16px;
+    }
+    .dish-name {
+      font-size:18px;
+      font-weight:600;
+      color:#1f2937;
+      margin-bottom:8px;
+    }
+    .dish-type {
+      display:inline-block;
+      padding:4px 10px;
+      background:#dbeafe;
+      color:#1e40af;
+      border-radius:4px;
+      font-size:12px;
+      font-weight:500;
+      margin-bottom:10px;
+    }
+    .dish-description {
+      font-size:14px;
+      color:#6b7280;
+      margin-bottom:12px;
+      line-height:1.5;
+      max-height:42px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+    }
+    .dish-price {
+      font-size:20px;
+      font-weight:700;
+      color:#3b82f6;
+      margin-bottom:12px;
+    }
+    .dish-status {
+      display:flex;
+      gap:8px;
+      font-size:12px;
+      margin-bottom:12px;
+    }
+    .status-badge {
+      padding:4px 8px;
+      border-radius:4px;
+      font-weight:500;
+    }
+    .status-available { background:#d1fae5; color:#065f46; }
+    .status-unavailable { background:#fee2e2; color:#991b1b; }
+    .status-sufficient { background:#dbeafe; color:#1e40af; }
+    .status-insufficient { background:#fef3c7; color:#92400e; }
+    .dish-actions {
+      display:flex;
+      gap:8px;
+    }
+    .btn-favorite {
+      flex:1;
+      padding:10px;
+      background:#eff6ff;
+      color:#3b82f6;
+      border:1px solid #bfdbfe;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+      transition:all 0.2s;
+    }
+    .btn-favorite:hover {
+      background:#dbeafe;
+    }
+    .btn-favorite.active {
+      background:#3b82f6;
+      color:#fff;
+      border-color:#3b82f6;
+    }
+    .btn-order {
+      flex:1;
+      padding:10px;
+      background:#3b82f6;
+      color:#fff;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .btn-order:hover {
+      background:#2563eb;
+    }
+    .btn-order:disabled {
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+    .loading {
+      text-align:center;
+      padding:40px;
+      font-size:16px;
+      color:#6b7280;
+    }
+    .empty-state {
+      text-align:center;
+      padding:60px 20px;
+    }
+    .empty-state h3 {
+      font-size:20px;
+      color:#6b7280;
+      margin-bottom:8px;
+    }
+    .empty-state p {
+      color:#9ca3af;
+    }
+    .pagination {
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:12px;
+      margin-top:32px;
+    }
+    .pagination button {
+      padding:10px 16px;
+      background:#fff;
+      color:#3b82f6;
+      border:1px solid #bfdbfe;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .pagination button:hover:not(:disabled) {
+      background:#eff6ff;
+    }
+    .pagination button:disabled {
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+    .pagination span {
+      color:#6b7280;
+      font-size:14px;
+    }
+    .alert {
+      padding:12px 16px;
+      border-radius:6px;
+      margin-bottom:20px;
+      font-size:14px;
+    }
+    .alert.error {
+      background:#fee;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+    .alert.success {
+      background:#f0fdf4;
+      color:#166534;
+      border:1px solid #bbf7d0;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>🍽️ Menu - Danh sách món ăn</h1>
+    <div class="user-info">
+      <span id="userName">Đang tải...</span>
+      <button onclick="logout()">Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="alertBox"></div>
+
+    <div class="filter-bar">
+      <div class="filter-row">
+        <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm món ăn...">
+        <select id="typeFilter">
+          <option value="">Tất cả loại món</option>
+          <option value="Appetizer">Khai vị</option>
+          <option value="Main Course">Món chính</option>
+          <option value="Dessert">Tráng miệng</option>
+          <option value="Beverage">Đồ uống</option>
+        </select>
+        <select id="statusFilter">
+          <option value="">Tất cả trạng thái</option>
+          <option value="Available">Có sẵn</option>
+          <option value="Unavailable">Không có sẵn</option>
+        </select>
+        <button onclick="applyFilters()">Lọc</button>
+        <button class="btn-reset" onclick="resetFilters()">Đặt lại</button>
+      </div>
+    </div>
+
+    <div id="menuContainer">
+      <div class="loading">Đang tải danh sách món ăn...</div>
+    </div>
+
+    <div id="paginationContainer"></div>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentFilters = {};
+    let favorites = new Set();
+
+    // Load user info
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.Name) {
+      document.getElementById('userName').textContent = user.Name;
+    }
+
+    // Check authentication
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+
+    // Show alert
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = `<div class="alert ${type}">${message}</div>`;
+      setTimeout(() => { alertBox.innerHTML = ''; }, 3000);
+    }
+
+    // Format price
+    function formatPrice(price) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    }
+
+    // Load favorites
+    async function loadFavorites() {
+      try {
+        const response = await fetch('/api/favorite/list', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          favorites = new Set(data.data.map(f => f.DishId._id));
+        }
+      } catch (error) {
+        console.error('Load favorites error:', error);
+      }
+    }
+
+    // Toggle favorite
+    async function toggleFavorite(dishId, button) {
+      try {
+        const isFavorite = favorites.has(dishId);
+        const url = isFavorite ? `/api/favorite/remove/${dishId}` : '/api/favorite/add';
+        const method = isFavorite ? 'DELETE' : 'POST';
+        const body = isFavorite ? undefined : JSON.stringify({ dishId });
+
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body
+        });
+
+        if (response.ok) {
+          if (isFavorite) {
+            favorites.delete(dishId);
+            button.classList.remove('active');
+            button.textContent = '🤍 Yêu thích';
+            showAlert('✅ Đã xóa khỏi danh sách yêu thích', 'success');
+          } else {
+            favorites.add(dishId);
+            button.classList.add('active');
+            button.textContent = '❤️ Đã thích';
+            showAlert('✅ Đã thêm vào danh sách yêu thích', 'success');
+          }
+        } else {
+          const data = await response.json();
+          showAlert(`❌ ${data.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Toggle favorite error:', error);
+        showAlert('❌ Lỗi khi thao tác yêu thích!', 'error');
+      }
+    }
+
+    // Load dishes
+    async function loadDishes(page = 1) {
+      try {
+        const params = new URLSearchParams({
+          page,
+          limit: 12,
+          ...currentFilters
+        });
+
+        const response = await fetch(`/api/menu?${params}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load dishes');
+        }
+
+        const data = await response.json();
+        displayDishes(data.data);
+        displayPagination(data.pagination);
+      } catch (error) {
+        console.error('Load dishes error:', error);
+        document.getElementById('menuContainer').innerHTML = `
+          <div class="empty-state">
+            <h3>❌ Không thể tải danh sách món ăn</h3>
+            <p>Vui lòng thử lại sau</p>
+          </div>
+        `;
+      }
+    }
+
+    // Display dishes
+    function displayDishes(dishes) {
+      const container = document.getElementById('menuContainer');
+
+      if (!dishes || dishes.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>🍽️ Không tìm thấy món ăn nào</h3>
+            <p>Thử thay đổi bộ lọc của bạn</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="menu-grid">
+          ${dishes.map(dish => `
+            <div class="dish-card">
+              <img src="${dish.DishImage || '/images/default-dish.jpg'}" alt="${dish.DishName}" class="dish-image" onerror="this.src='/images/default-dish.jpg'">
+              <div class="dish-content">
+                <h3 class="dish-name">${dish.DishName}</h3>
+                <span class="dish-type">${dish.DishType}</span>
+                ${dish.DishDescription ? `<p class="dish-description">${dish.DishDescription}</p>` : ''}
+                <div class="dish-price">${formatPrice(dish.DishPrice)}</div>
+                <div class="dish-status">
+                  <span class="status-badge ${dish.DishStatus === 'Available' ? 'status-available' : 'status-unavailable'}">
+                    ${dish.DishStatus === 'Available' ? '✓ Có sẵn' : '✗ Hết món'}
+                  </span>
+                  <span class="status-badge ${dish.IngredientStatus === 'Sufficient' ? 'status-sufficient' : 'status-insufficient'}">
+                    ${dish.IngredientStatus === 'Sufficient' ? '✓ Đủ nguyên liệu' : '⚠ Thiếu nguyên liệu'}
+                  </span>
+                </div>
+                <div class="dish-actions">
+                  <button class="btn-favorite ${favorites.has(dish._id) ? 'active' : ''}" onclick="toggleFavorite('${dish._id}', this)">
+                    ${favorites.has(dish._id) ? '❤️ Đã thích' : '🤍 Yêu thích'}
+                  </button>
+                  <button class="btn-order" ${dish.DishStatus !== 'Available' ? 'disabled' : ''} onclick="orderDish('${dish._id}', '${dish.DishName}')">
+                    🛒 Đặt món
+                  </button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Display pagination
+    function displayPagination(pagination) {
+      currentPage = pagination.currentPage;
+      totalPages = pagination.totalPages;
+
+      const container = document.getElementById('paginationContainer');
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="pagination">
+          <button onclick="loadDishes(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+            ← Trước
+          </button>
+          <span>Trang ${currentPage} / ${totalPages}</span>
+          <button onclick="loadDishes(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+            Sau →
+          </button>
+        </div>
+      `;
+    }
+
+    // Apply filters
+    function applyFilters() {
+      currentFilters = {};
+      
+      const search = document.getElementById('searchInput').value.trim();
+      const type = document.getElementById('typeFilter').value;
+      const status = document.getElementById('statusFilter').value;
+
+      if (search) currentFilters.search = search;
+      if (type) currentFilters.type = type;
+      if (status) currentFilters.status = status;
+
+      loadDishes(1);
+    }
+
+    // Reset filters
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('typeFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+      currentFilters = {};
+      loadDishes(1);
+    }
+
+    // Order dish (placeholder)
+    function orderDish(dishId, dishName) {
+      showAlert(`✅ Đã thêm "${dishName}" vào giỏ hàng!`, 'success');
+      // TODO: Implement order functionality
+    }
+
+    // Enter key to search
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') applyFilters();
+    });
+
+    // Initialize
+    (async function init() {
+      await loadFavorites();
+      await loadDishes(1);
+    })();
+  </script>
+</body>
+</html>

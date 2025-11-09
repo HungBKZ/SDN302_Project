@@ -1,6 +1,7 @@
 const express = require('express');
 
 // Import các router modules
+const viewRouter = require('../modules/view/view.router');
 const menuRouter = require('../modules/menu/menu.router');
 const accountRouter = require('../modules/account/account.router');
 const managerRouter = require('../modules/manager/manager.router');
@@ -15,6 +16,9 @@ const reservationRouter = require('../modules/reservation/reservation.router');
  * @param {Express} app - Express application instance
  */
 const initRoutes = (app) => {
+    // View routes (render EJS pages)
+    app.use('/', viewRouter);
+
     // API routes
     app.use('/api/menu', menuRouter);
     app.use('/api/account', accountRouter);

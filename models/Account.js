@@ -23,6 +23,10 @@ const accountSchema = new mongoose.Schema(
             unique: true,
             lowercase: true,
             trim: true,
+            // validate: {
+            //     validator: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+            //     message: 'Email không hợp lệ'
+            // }
         },
         UserPhone: {
             type: String,
@@ -32,6 +36,8 @@ const accountSchema = new mongoose.Schema(
         UserPassword: {
             type: String,
             required: true,
+            // minlength: 6,
+            // select: false // Không trả về mặc định
         },
         Name: {
             type: String,
@@ -47,6 +53,7 @@ const accountSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
+            // select: false // Ẩn mặc định
         },
         UserAddress: {
             type: String,
@@ -60,6 +67,7 @@ const accountSchema = new mongoose.Schema(
         IsDeleted: {
             type: Boolean,
             default: false,
+            // index: true
         },
         CreatedAt: {
             type: Date,
@@ -77,4 +85,5 @@ const Account = mongoose.model('Account', accountSchema, 'accounts');
 module.exports = {
     Account,
     ACCOUNT_ROLES
+};
 };

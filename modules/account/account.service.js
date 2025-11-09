@@ -279,6 +279,19 @@ class AccountService {
         };
     }
 
+    async isUserExist(userId) {
+        const account = await Account.findById(userId);
+
+        if (!account) {
+            return null;
+        }
+
+        if (account.IsDeleted) {
+            return null;
+        }
+
+        return account;
+    }
     /* ---------- New features - Nhu (ĐÃ HOÀN THIỆN) ---------- */
 
     /**

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Quản lý khuyến mãi</title>
+    <style>
+        /* Giao diện tương đồng manager-dashboard */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: Segoe UI, Tahoma, Verdana, sans-serif;
+            background: #f0f7ff;
+            min-height: 100vh
+        }
+
+        .navbar {
+            background: #3b82f6;
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .navbar h1 {
+            font-size: 20px
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px
+        }
+
+        .card {
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+            margin-bottom: 16px
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        textarea,
+        select {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px
+        }
+
+        button {
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: none;
+            background: #3b82f6;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        button.ghost {
+            background: #fff;
+            color: #3b82f6;
+            border: 1px solid #bfdbfe
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            text-align: left
+        }
+
+        th {
+            background: #f9fafb;
+            font-weight: 700;
+            color: #374151
+        }
+
+        .actions button {
+            margin-right: 8px;
+            padding: 6px 10px;
+            font-size: 13px
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .5);
+            align-items: center;
+            justify-content: center
+        }
+
+        .modal.active {
+            display: flex
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 100%;
+            padding: 16px
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .msg {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 12px
+        }
+
+        .msg.success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0
+        }
+
+        .msg.error {
+            background: #fff1f0;
+            color: #9b1c1c;
+            border: 1px solid #ffd3d3
+        }
+
+        .small {
+            font-size: 13px;
+            color: #6b7280
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-weight: 600
+        }
+
+        .badge.expired {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .badge.active {
+            background: #d1fae5;
+            color: #065f46
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <h1>🎯 Quản lý Khuyến mãi</h1>
+        <div>
+            <span id="userName" class="small">Đang tải...</span>
+            <button onclick="logout()" style="margin-left:12px">Đăng xuất</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="alertContainer"></div>
+
+        <div class="card">
+            <div class="controls">
+                <input type="text" id="q" placeholder="Tìm theo mô tả..." style="min-width:260px">
+                <button onclick="applySearch()">Tìm</button>
+                <button class="ghost" onclick="resetSearch()">Đặt lại</button>
+                <div style="flex:1"></div>
+                <button onclick="openAddModal()">+ Thêm Khuyến mãi</button>
+            </div>
+
+            <div id="listArea">
+                <div class="small" style="margin-top:12px">Đang tải danh sách...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Add/Edit -->
+    <div id="modal" class="modal" aria-hidden="true">
+        <div class="modal-content">
+            <h3 id="modalTitle">Thêm khuyến mãi</h3>
+            <div id="modalMsg"></div>
+
+            <form id="promoForm">
+                <div class="form-row">
+                    <div>
+                        <label>Giảm (VND / số) <span class="small">*</span></label>
+                        <input id="DiscountAmount" type="number" min="0" step="0.01" required>
+                    </div>
+                    <div>
+                        <label>Ngày hết hạn <span class="small">*</span></label>
+                        <input id="ExpirationDate" type="datetime-local" required>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px">
+                    <label>Mô tả</label>
+                    <textarea id="Description" rows="3" style="width:100%;"></textarea>
+                </div>
+
+                <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+                    <button type="button" class="ghost" onclick="closeModal()">Hủy</button>
+                    <button id="saveBtn" type="submit">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra auth + role NGAY LẬP TỨC trước khi gọi bất kỳ API nào
+        const user = (() => {
+            try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch (e) { return {}; }
+        })();
+        const token = localStorage.getItem('token');
+
+        if (!token || !user || !user.UserRole || !['Admin', 'Manager'].includes(user.UserRole)) {
+            // Nếu chưa đăng nhập hoặc không đủ quyền -> chuyển về login
+            // Giữ client-side redirect giống menu.ejs, không thay đổi auth middleware
+            window.location.href = '/login';
+        } else {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('userName').textContent = user.Name || user.UserEmail || user.UserCode || user._id;
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        let editingId = null;
+        const listArea = document.getElementById('listArea');
+        const alertContainer = document.getElementById('alertContainer');
+
+        function showAlert(msg, type = 'success', timeout = 3000) {
+            alertContainer.innerHTML = `<div class="msg ${type === 'error' ? 'error' : 'success'}">${msg}</div>`;
+            setTimeout(() => alertContainer.innerHTML = '', timeout);
+        }
+
+        // Load promotions (chỉ gọi khi đã có token)
+        async function loadPromotions() {
+            listArea.innerHTML = '<div class="small" style="margin-top:12px">Đang tải danh sách...</div>';
+            const q = (new URLSearchParams({ q: document.getElementById('q').value || '' })).toString();
+            try {
+                const res = await fetch('/api/coupons?' + q, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401 || res.status === 403) {
+                    // token invalid/expired -> redirect về login
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/login';
+                    return;
+                }
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({ message: res.statusText }));
+                    listArea.innerHTML = `<div class="small">Lỗi: ${data.message || res.statusText}</div>`;
+                    return;
+                }
+                const data = await res.json();
+                renderList(data);
+            } catch (err) {
+                console.error(err);
+                listArea.innerHTML = `<div class="small">Lỗi kết nối. Vui lòng thử lại.</div>`;
+            }
+        }
+
+        function renderList(items) {
+            if (!items || items.length === 0) {
+                listArea.innerHTML = `<div class="small" style="margin-top:12px">Chưa có khuyến mãi nào.</div>`;
+                return;
+            }
+            const rows = items.map(it => {
+                const exp = it.ExpirationDate ? new Date(it.ExpirationDate) : null;
+                const isExpired = exp ? (new Date() > exp) : false;
+                return `
+        <tr>
+          <td>${it._id}</td>
+          <td>${it.Description || ''}</td>
+          <td>${Number(it.DiscountAmount).toLocaleString('vi-VN')} </td>
+          <td>${exp ? exp.toLocaleString() : '-'}</td>
+          <td>${isExpired ? '<span class="badge expired">Đã hết hạn</span>' : '<span class="badge active">Còn hạn</span>'}</td>
+          <td class="actions">
+            <button class="ghost" onclick="openEditModal('${it._id}')">✏️ Sửa</button>
+            <button onclick="deletePromo('${it._id}', '${(it.Description || '').replace(/'/g, '\\\'')}')">🗑️ Xóa</button>
+          </td>
+        </tr>
+      `;
+            }).join('');
+
+            listArea.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Mô tả</th><th>Giảm</th><th>Hết hạn</th><th>Trạng thái</th><th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+        }
+
+        // Modal controls (giữ nguyên logic cũ)
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMsg = document.getElementById('modalMsg');
+        const form = document.getElementById('promoForm');
+        const saveBtn = document.getElementById('saveBtn');
+
+        function openAddModal() {
+            editingId = null;
+            modalTitle.textContent = 'Thêm khuyến mãi';
+            modalMsg.innerHTML = '';
+            form.reset();
+            modal.classList.add('active');
+            document.getElementById('DiscountAmount').focus();
+        }
+
+        async function openEditModal(id) {
+            try {
+                const res = await fetch('/api/coupons/' + id, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401 || res.status === 403) { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; return; }
+                if (!res.ok) {
+                    const d = await res.json().catch(() => ({ message: res.statusText }));
+                    showAlert('Không tải được dữ liệu: ' + (d.message || res.statusText), 'error');
+                    return;
+                }
+                const data = await res.json();
+                editingId = id;
+                modalTitle.textContent = 'Chỉnh sửa khuyến mãi';
+                document.getElementById('DiscountAmount').value = data.DiscountAmount;
+                if (data.ExpirationDate) {
+                    const dt = new Date(data.ExpirationDate);
+                    const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                    document.getElementById('ExpirationDate').value = local;
+                } else document.getElementById('ExpirationDate').value = '';
+                document.getElementById('Description').value = data.Description || '';
+                modal.classList.add('active');
+            } catch (err) {
+                console.error(err);
+                showAlert('Lỗi tải dữ liệu', 'error');
+            }
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            editingId = null;
+            form.reset();
+        }
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            modalMsg.innerHTML = '';
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Đang xử lý...';
+
+            const payload = {
+                DiscountAmount: document.getElementById('DiscountAmount').value,
+                ExpirationDate: (function () {
+                    const v = document.getElementById('ExpirationDate').value;
+                    return v ? new Date(v).toISOString() : null;
+                })(),
+                Description: document.getElementById('Description').value.trim()
+            };
+
+            const errors = [];
+            if (payload.DiscountAmount === '' || isNaN(Number(payload.DiscountAmount)) || Number(payload.DiscountAmount) < 0) {
+                errors.push('DiscountAmount hợp lệ >= 0');
+            }
+            if (!payload.ExpirationDate) errors.push('ExpirationDate là bắt buộc');
+
+            if (errors.length) {
+                modalMsg.innerHTML = `<div class="msg error">${errors.join(', ')}</div>`;
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Lưu';
+                return;
+            }
+
+            try {
+                const url = editingId ? '/api/coupons/' + editingId : '/api/coupons';
+                const method = editingId ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
+                });
+                if (res.status === 401 || res.status === 403) { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; return; }
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    modalMsg.innerHTML = `<div class="msg error">${data.message || (data.errors ? JSON.stringify(data.errors) : res.statusText)}</div>`;
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Lưu';
+                    return;
+                }
+                showAlert(editingId ? 'Cập nhật thành công' : 'Tạo khuyến mãi thành công');
+                closeModal();
+                loadPromotions();
+            } catch (err) {
+                console.error(err);
+                modalMsg.innerHTML = `<div class="msg error">Lỗi kết nối</div>`;
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Lưu';
+            }
+        });
+
+        async function deletePromo(id, desc) {
+            if (!confirm(`Xác nhận xóa khuyến mãi: "${desc || id}"? (xóa mềm)`)) return;
+            try {
+                const res = await fetch('/api/coupons/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401 || res.status === 403) { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; return; }
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    showAlert(data.message || 'Xóa thất bại', 'error');
+                    return;
+                }
+                showAlert('Xóa thành công');
+                loadPromotions();
+            } catch (err) {
+                console.error(err);
+                showAlert('Lỗi kết nối', 'error');
+            }
+        }
+
+        function applySearch() { loadPromotions(); }
+        function resetSearch() { document.getElementById('q').value = ''; loadPromotions(); }
+
+        // Chỉ gọi init khi đã có token hợp lệ (đã kiểm tra ở đầu)
+        (function init() { loadPromotions(); })();
+    </script>
+</body>
+</html>

@@ -44,10 +44,11 @@ const messageSchema = new mongoose.Schema(
             default: false,
             index: true
         },
-        // ReadAt: {
-        //     type: Date,
-        //     default: null
-        // },
+        ReadAt: {
+            type: Date,
+            default: null,
+            index: true
+        },
         // // Giữ soft delete như cũ (có thể đổi sang Boolean nếu muốn nhất quán)
         // IsDeleted: {
         //     type: Number,

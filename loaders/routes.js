@@ -8,6 +8,7 @@ const managerRouter = require('../modules/manager/manager.router');
 const favoriteRouter = require('../modules/favorite/favorite.router');
 const tableRouter = require('../modules/table/table.router');
 const reservationRouter = require('../modules/reservation/reservation.router');
+const couponRouter = require('../modules/coupon/coupon.router');
 // const authRouter = require('../modules/auth/auth.router');
 // const orderRouter = require('../modules/order/order.router');
 
@@ -26,6 +27,7 @@ const initRoutes = (app) => {
     app.use('/api/favorite', favoriteRouter);
     app.use('/api/tables', tableRouter);
     app.use('/api/reservations', reservationRouter);
+    app.use('/api/coupons', couponRouter);
     // Uncomment khi đã có router tương ứng
     // app.use('/api/auth', authRouter);
     // app.use('/api/order', orderRouter);
@@ -51,6 +53,7 @@ const initRoutes = (app) => {
                 manager: '/api/manager',
                 favorite: '/api/favorite',
                 tables: '/api/tables',
+                coupons: '/api/coupons',
                 // auth: '/api/auth',
                 // order: '/api/order',
                 health: '/health'

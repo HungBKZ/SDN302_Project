@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết món ăn</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .navbar {
+      background: #3b82f6;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .navbar h1 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .navbar button {
+      padding: 8px 16px;
+      background: white;
+      color: #3b82f6;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .navbar button:hover {
+      background: #f0f2f5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .dish-detail {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      padding: 30px;
+    }
+    .dish-image-container {
+      position: relative;
+    }
+    .dish-image {
+      width: 100%;
+      height: 350px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .status-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .status-available {
+      background: #10b981;
+      color: white;
+    }
+    .status-unavailable {
+      background: #ef4444;
+      color: white;
+    }
+    .dish-info {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .dish-title {
+      font-size: 26px;
+      font-weight: bold;
+      color: #111827;
+    }
+    .dish-type {
+      display: inline-block;
+      padding: 5px 12px;
+      background: #e0e7ff;
+      color: #4338ca;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      width: fit-content;
+    }
+    .dish-price {
+      font-size: 28px;
+      font-weight: bold;
+      color: #dc2626;
+      margin: 8px 0;
+    }
+    .dish-description {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.6;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 6px;
+      border-left: 3px solid #3b82f6;
+    }
+    .ingredient-status {
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ingredient-sufficient {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    .ingredient-insufficient {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+    .btn-favorite {
+      background: white;
+      color: #ef4444;
+      border: 2px solid #ef4444;
+    }
+    .btn-favorite:hover {
+      background: #ef4444;
+      color: white;
+    }
+    .btn-favorite.active {
+      background: #ef4444;
+      color: white;
+    }
+    .btn:disabled {
+      background: #d1d5db;
+      color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .alert {
+      padding: 10px 16px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      display: none;
+      font-size: 13px;
+    }
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      .dish-detail {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+      }
+      .dish-image {
+        height: 250px;
+      }
+      .dish-title {
+        font-size: 22px;
+      }
+      .dish-price {
+        font-size: 24px;
+      }
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>🍽️ Chi tiết món ăn</h1>
+    <div class="user-info">
+      <button onclick="goBack()">← Quay lại</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="alertBox" class="alert"></div>
+    
+    <div class="dish-detail" id="dishDetail">
+      <div style="text-align: center; padding: 60px; color: #6b7280;">
+        <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+        <div style="font-size: 18px;">Đang tải thông tin món ăn...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentDish = null;
+    let isFavorite = false;
+
+    // Get token and user
+    function getToken() {
+      return localStorage.getItem('token');
+    }
+
+    function getUser() {
+      const userData = localStorage.getItem('user');
+      return userData ? JSON.parse(userData) : null;
+    }
+
+    // Go back
+    function goBack() {
+      window.location.href = '/menu';
+    }
+
+    // Show alert
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = `alert alert-${type}`;
+      alertBox.style.display = 'block';
+
+      setTimeout(() => {
+        alertBox.style.display = 'none';
+      }, 4000);
+    }
+
+    // Get dish ID from URL
+    function getDishId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+      }).format(amount);
+    }
+
+    // Load dish detail
+    async function loadDishDetail() {
+      const dishId = getDishId();
+      
+      if (!dishId) {
+        showAlert('Không tìm thấy món ăn', 'error');
+        setTimeout(() => window.location.href = '/menu', 2000);
+        return;
+      }
+
+      try {
+        // Load dish
+        const response = await fetch(`http://127.0.0.1:1234/api/menu/${dishId}`);
+        
+        if (!response.ok) {
+          throw new Error('Không thể tải thông tin món ăn');
+        }
+
+        const result = await response.json();
+        currentDish = result.data;
+
+        // Check favorite status
+        await checkFavoriteStatus(dishId);
+
+        // Display dish
+        displayDish(currentDish);
+
+      } catch (error) {
+        console.error('Load dish error:', error);
+        showAlert('❌ ' + error.message, 'error');
+        document.getElementById('dishDetail').innerHTML = `
+          <div style="text-align: center; padding: 60px; color: #ef4444;">
+            <div style="font-size: 48px; margin-bottom: 20px;">❌</div>
+            <div style="font-size: 18px;">Không thể tải thông tin món ăn</div>
+            <button onclick="goBack()" style="margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
+              Quay lại
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // Check favorite status
+    async function checkFavoriteStatus(dishId) {
+      const token = getToken();
+      if (!token) return;
+
+      try {
+        const response = await fetch(`http://127.0.0.1:1234/api/favorite/check/${dishId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          isFavorite = result.data.isFavorite;
+        }
+      } catch (error) {
+        console.error('Check favorite error:', error);
+      }
+    }
+
+    // Display dish
+    function displayDish(dish) {
+      const isAvailable = dish.DishStatus === 'Available';
+      const isSufficient = dish.IngredientStatus === 'Sufficient';
+
+      document.getElementById('dishDetail').innerHTML = `
+        <div class="dish-image-container">
+          <img src="${dish.DishImage || '/images/default-dish.jpg'}" 
+               alt="${dish.DishName}" 
+               class="dish-image"
+               onerror="this.src='/images/default-dish.jpg'">
+          <span class="status-badge ${isAvailable ? 'status-available' : 'status-unavailable'}">
+            ${isAvailable ? '✓ Còn món' : '✗ Hết món'}
+          </span>
+        </div>
+
+        <div class="dish-info">
+          <h1 class="dish-title">${dish.DishName}</h1>
+          
+          <span class="dish-type">
+            ${dish.DishType === 'Food' ? '🍽️ Đồ ăn' : '🥤 Đồ uống'}
+          </span>
+
+          <div class="dish-price">${formatCurrency(dish.DishPrice)}</div>
+
+          <div class="dish-description">
+            ${dish.DishDescription || 'Chưa có mô tả cho món ăn này.'}
+          </div>
+
+          <div class="ingredient-status ${isSufficient ? 'ingredient-sufficient' : 'ingredient-insufficient'}">
+            ${isSufficient ? '✓ Đủ nguyên liệu' : '⚠ Thiếu nguyên liệu'}
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-favorite ${isFavorite ? 'active' : ''}" 
+                    id="btnFavorite" 
+                    onclick="toggleFavorite()">
+              ${isFavorite ? '❤️ Đã thích' : '🤍 Yêu thích'}
+            </button>
+            <button class="btn btn-primary" 
+                    onclick="addToCart()" 
+                    ${!isAvailable ? 'disabled' : ''}>
+              🛒 Thêm vào giỏ
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Toggle favorite
+    async function toggleFavorite() {
+      const token = getToken();
+      
+      if (!token) {
+        showAlert('Vui lòng đăng nhập để sử dụng chức năng này', 'error');
+        return;
+      }
+
+      const dishId = getDishId();
+      const btn = document.getElementById('btnFavorite');
+      btn.disabled = true;
+
+      try {
+        if (isFavorite) {
+          // Remove favorite
+          const response = await fetch(`http://127.0.0.1:1234/api/favorite/remove/${dishId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) throw new Error('Không thể bỏ yêu thích');
+
+          isFavorite = false;
+          btn.textContent = '🤍 Yêu thích';
+          btn.classList.remove('active');
+          showAlert('✅ Đã bỏ yêu thích', 'success');
+        } else {
+          // Add favorite
+          const response = await fetch('http://127.0.0.1:1234/api/favorite/add', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ dishId: dishId })
+          });
+
+          if (!response.ok) throw new Error('Không thể thêm yêu thích');
+
+          isFavorite = true;
+          btn.textContent = '❤️ Đã thích';
+          btn.classList.add('active');
+          showAlert('✅ Đã thêm vào yêu thích', 'success');
+        }
+      } catch (error) {
+        console.error('Toggle favorite error:', error);
+        showAlert('❌ ' + error.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Add to cart
+    function addToCart() {
+      if (!currentDish) return;
+
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existingItem = cart.find(item => item._id === currentDish._id);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+        showAlert('✅ Đã tăng số lượng trong giỏ hàng', 'success');
+      } else {
+        cart.push({
+          _id: currentDish._id,
+          DishName: currentDish.DishName,
+          DishType: currentDish.DishType,
+          DishPrice: currentDish.DishPrice,
+          DishImage: currentDish.DishImage,
+          quantity: 1
+        });
+        showAlert('✅ Đã thêm vào giỏ hàng', 'success');
+      }
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    // Initialize
+    loadDishDetail();
+  </script>
+</body>
+</html>

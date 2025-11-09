@@ -10,6 +10,8 @@ class FavoriteController {
             const userId = req.user._id;
             const { dishId } = req.body;
 
+            console.log('🔥 Add Favorite - UserId:', userId, 'DishId:', dishId);
+
             const favorite = await favoriteService.addFavorite(userId, dishId);
 
             return res.status(201).json({

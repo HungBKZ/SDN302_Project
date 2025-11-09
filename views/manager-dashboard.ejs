@@ -38,6 +38,18 @@
       background:rgba(255,255,255,0.15);
       border-radius:6px;
     }
+    .navbar .user-info a.user-link {
+      padding:8px 16px;
+      background:rgba(255,255,255,0.15);
+      border-radius:6px;
+      color:#fff;
+      text-decoration:none;
+      cursor:pointer;
+      transition: background 0.3s;
+    }
+    .navbar .user-info a.user-link:hover {
+      background:rgba(255,255,255,0.25);
+    }
     .navbar button {
       padding:8px 16px;
       background:#fff;
@@ -406,7 +418,7 @@
   <div class="navbar">
     <h1>👨‍💼 Manager Dashboard</h1>
     <div class="user-info">
-      <span id="userName">Đang tải...</span>
+      <a href="/profile" class="user-link" id="userName">👤 Đang tải...</a>
       <button onclick="logout()">Đăng xuất</button>
     </div>
   </div>

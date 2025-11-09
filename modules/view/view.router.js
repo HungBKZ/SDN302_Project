@@ -39,6 +39,42 @@ router.get('/menu', (req, res) => {
 });
 
 /**
+ * @route   GET /cart
+ * @desc    Render trang giỏ hàng
+ * @access  Public
+ */
+router.get('/cart', (req, res) => {
+    res.render('cart');
+});
+
+/**
+ * @route   GET /profile
+ * @desc    Render trang hồ sơ cá nhân
+ * @access  Public
+ */
+router.get('/profile', (req, res) => {
+    res.render('profile');
+});
+
+/**
+ * @route   GET /favorites
+ * @desc    Render trang món yêu thích
+ * @access  Public
+ */
+router.get('/favorites', (req, res) => {
+    res.render('favorites');
+});
+
+/**
+ * @route   GET /dish-detail
+ * @desc    Render trang chi tiết món ăn
+ * @access  Public
+ */
+router.get('/dish-detail', (req, res) => {
+    res.render('dish-detail');
+});
+
+/**
  * @route   GET /manager/dashboard
  * @desc    Render trang quản lý
  * @access  Manager only

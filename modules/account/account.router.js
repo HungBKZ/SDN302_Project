@@ -46,6 +46,13 @@ router.post('/logout', auth, accountController.logout);
 router.get('/me', auth, accountController.getCurrentUser);
 
 /**
+ * @route   GET /api/account/profile
+ * @desc    Lấy thông tin profile
+ * @access  Private
+ */
+router.get('/profile', auth, accountController.getProfile);
+
+/**
  * @route   PUT /api/account/profile
  * @desc    Cập nhật thông tin tài khoản
  * @access  Private

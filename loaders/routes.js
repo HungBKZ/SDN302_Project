@@ -8,13 +8,15 @@ const managerRouter = require('../modules/manager/manager.router');
 const favoriteRouter = require('../modules/favorite/favorite.router');
 const tableRouter = require('../modules/table/table.router');
 const cartRouter = require('../modules/cart/cart.router');
+const orderRouter = require('../modules/order/order.router');
 const reservationRouter = require('../modules/reservation/reservation.router');
 const couponRouter = require('../modules/coupon/coupon.router');
 const rewardRouter = require('../modules/reward/reward.router');
 const incidentReportRouter = require('../modules/incidentReport/incidentReport.router');
+const paymentRouter = require('../modules/payment/payment.controller.router');
+const orderDetailRouter = require('../modules/orderDetail/orderDetail.router');
 const chatRouter = require('../modules/chat/chat.router');
 // const authRouter = require('../modules/auth/auth.router');
-// const orderRouter = require('../modules/order/order.router');
 
 /**
  * Khởi tạo và cấu hình tất cả routes cho ứng dụng
@@ -31,15 +33,17 @@ const initRoutes = (app) => {
     app.use('/api/favorite', favoriteRouter);
     app.use('/api/tables', tableRouter);
     app.use('/api/cart', cartRouter);
+    app.use('/api/order', orderRouter);
     app.use('/api/reservations', reservationRouter);
     app.use('/api/coupons', couponRouter);
     app.use('/api/reward', rewardRouter);
     app.use('/api/incidents', incidentReportRouter);
+    app.use('/api/payments', paymentRouter);
+    app.use('/api/order-details', orderDetailRouter);
     app.use('/api/chat', chatRouter);
 
     // Uncomment khi đã có router tương ứng
     // app.use('/api/auth', authRouter);
-    // app.use('/api/order', orderRouter);
 
     // Health check route
     app.get('/health', (req, res) => {
@@ -63,9 +67,9 @@ const initRoutes = (app) => {
                 favorite: '/api/favorite',
                 tables: '/api/tables',
                 cart: '/api/cart',
+                order: '/api/order',
                 coupons: '/api/coupons',
                 // auth: '/api/auth',
-                // order: '/api/order',
                 health: '/health'
             }
         });

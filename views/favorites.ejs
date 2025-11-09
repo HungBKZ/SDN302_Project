@@ -380,7 +380,8 @@
     // Display favorites
     function displayFavorites(favorites) {
       document.getElementById('dishesGrid').innerHTML = favorites.map(fav => {
-        const dish = fav.DishId;
+        const dish = fav.dish; // Đổi từ fav.DishId sang fav.dish
+        if (!dish) return ''; // Skip nếu dish bị null
         const isAvailable = dish.DishStatus === 'Available';
 
         return `

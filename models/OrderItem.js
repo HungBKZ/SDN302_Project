@@ -55,8 +55,8 @@ const orderItemSchema = new mongoose.Schema(
     }
 );
 
-// // Mỗi (OrderId, DishId) chỉ có một dòng để tránh trùng món trong cùng đơn
-// orderItemSchema.index({ OrderId: 1, DishId: 1 }, { unique: true });
+// Mỗi (OrderId, DishId) chỉ có một dòng để tránh trùng món trong cùng đơn
+orderItemSchema.index({ OrderId: 1, DishId: 1 }, { unique: true });
 
 // // Virtual: tổng tiền dòng = Quantity * UnitPrice, làm tròn 2 chữ số
 // orderItemSchema.virtual('LineTotal').get(function () {

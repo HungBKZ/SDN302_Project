@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Đăng nhập - Restaurant System</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f7ff;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .login-card {
+      background:#fff;
+      width:100%;
+      max-width:420px;
+      border-radius:12px;
+      box-shadow:0 4px 12px rgba(59,130,246,0.1);
+      overflow:hidden;
+    }
+    .header {
+      background:#3b82f6;
+      padding:28px 24px;
+      text-align:center;
+      color:#fff;
+    }
+    .header h1 {
+      font-size:24px;
+      font-weight:600;
+      margin-bottom:4px;
+    }
+    .header p {
+      font-size:14px;
+      opacity:0.95;
+    }
+    .form-container {
+      padding:28px 24px;
+    }
+    .form-group {
+      margin-bottom:18px;
+    }
+    .form-group label {
+      display:block;
+      font-size:14px;
+      font-weight:500;
+      color:#374151;
+      margin-bottom:6px;
+    }
+    .input-wrapper input {
+      width:100%;
+      padding:11px 14px;
+      font-size:15px;
+      border:1px solid #d1d5db;
+      border-radius:6px;
+      transition: border-color 0.2s;
+    }
+    .input-wrapper input:focus {
+      outline:none;
+      border-color:#3b82f6;
+    }
+    .btn-submit {
+      width:100%;
+      padding:12px;
+      font-size:15px;
+      font-weight:600;
+      color:#fff;
+      background:#3b82f6;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      margin-top:8px;
+    }
+    .btn-submit:hover:not(:disabled) {
+      background:#2563eb;
+    }
+    .btn-submit:disabled {
+      opacity:0.6;
+      cursor:not-allowed;
+    }
+    .links {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:14px;
+      font-size:13px;
+    }
+    .links a {
+      color:#3b82f6;
+      text-decoration:none;
+    }
+    .links a:hover {
+      text-decoration:underline;
+    }
+    .divider {
+      margin:20px 0;
+      text-align:center;
+      position:relative;
+    }
+    .divider::before {
+      content:'';
+      position:absolute;
+      left:0;
+      top:50%;
+      width:100%;
+      height:1px;
+      background:#e5e7eb;
+    }
+    .divider span {
+      position:relative;
+      background:#fff;
+      padding:0 10px;
+      color:#9ca3af;
+      font-size:13px;
+    }
+    .test-info {
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      border-radius:6px;
+      padding:12px;
+      margin-top:14px;
+    }
+    .test-info p {
+      font-size:13px;
+      color:#1e40af;
+      line-height:1.5;
+    }
+    .test-info strong {
+      color:#1e3a8a;
+    }
+    .alert {
+      padding:10px 12px;
+      border-radius:6px;
+      margin-bottom:14px;
+      font-size:14px;
+    }
+    .alert.error {
+      background:#fee;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+    .alert.success {
+      background:#f0fdf4;
+      color:#166534;
+      border:1px solid #bbf7d0;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="header">
+      <h1>🍽️ Restaurant System</h1>
+      <p>Chào mừng bạn quay trở lại</p>
+    </div>
+
+    <div class="form-container">
+      <div id="message" aria-live="polite"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <div class="input-wrapper">
+            <input 
+              id="email" 
+              name="email" 
+              type="email" 
+              placeholder="Nhập email của bạn" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <div class="input-wrapper">
+            <input 
+              id="password" 
+              name="password" 
+              type="password" 
+              placeholder="Nhập mật khẩu" 
+              required 
+              minlength="6"
+              autocomplete="current-password"
+            />
+          </div>
+        </div>
+
+        <button id="submitBtn" type="submit" class="btn-submit">
+          Đăng nhập
+        </button>
+
+        <div class="links">
+          <a href="/register">Đăng ký tài khoản</a>
+          <a href="/reset-password">Quên mật khẩu?</a>
+        </div>
+      </form>
+
+      <div class="divider">
+        <span>Tài khoản demo</span>
+      </div>
+
+      <div class="test-info">
+        <p>
+          <strong>Email:</strong> manager@gmail.com<br>
+          <strong>Password:</strong> 123456
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const form = document.getElementById('loginForm');
+      const msgEl = document.getElementById('message');
+      const submitBtn = document.getElementById('submitBtn');
+
+      function showMessage(text, type){
+        msgEl.innerHTML = '';
+        if(!text) return;
+        const div = document.createElement('div');
+        div.className = 'alert ' + type;
+        div.textContent = text;
+        msgEl.appendChild(div);
+      }
+
+      form.addEventListener('submit', async function(e){
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang xử lý...';
+        showMessage('Đang đăng nhập...', 'success');
+
+        const payload = {
+          email: form.email.value.trim(),
+          password: form.password.value
+        };
+
+        try{
+          const res = await fetch('/api/account/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+          
+          if(!res.ok || !data.success){
+            showMessage(data.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Đăng nhập';
+            return;
+          }
+
+          // Save token and user info to localStorage
+          if (data.data && data.data.token) {
+            try { 
+              localStorage.setItem('token', data.data.token);
+              localStorage.setItem('user', JSON.stringify(data.data.user));
+            } catch(e){}
+          }
+
+          showMessage('✅ Đăng nhập thành công! Đang chuyển hướng...', 'success');
+          
+          // Redirect based on user role
+          setTimeout(function(){
+            const user = data.data.user;
+            if(user && user.UserRole === 'Manager') {
+              location.href = '/manager/dashboard';
+            } else {
+              location.href = '/menu';
+            }
+          }, 1000);
+        } catch(err){
+          showMessage('❌ Lỗi kết nối. Vui lòng thử lại sau.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Đăng nhập';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

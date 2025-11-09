@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manager Dashboard</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f7ff;
+      min-height:100vh;
+    }
+    .navbar {
+      background:#3b82f6;
+      color:#fff;
+      padding:16px 24px;
+      box-shadow:0 2px 8px rgba(59,130,246,0.2);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+    .navbar h1 {
+      font-size:22px;
+      font-weight:600;
+    }
+    .navbar .user-info {
+      display:flex;
+      align-items:center;
+      gap:16px;
+      font-size:14px;
+    }
+    .navbar .user-info span {
+      padding:8px 16px;
+      background:rgba(255,255,255,0.15);
+      border-radius:6px;
+    }
+    .navbar button {
+      padding:8px 16px;
+      background:#fff;
+      color:#3b82f6;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .navbar button:hover {
+      background:#f0f7ff;
+    }
+    .container {
+      max-width:1400px;
+      margin:0 auto;
+      padding:24px 20px;
+    }
+    .stats-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+      gap:20px;
+      margin-bottom:32px;
+    }
+    .stat-card {
+      background:#fff;
+      padding:24px;
+      border-radius:8px;
+      box-shadow:0 2px 8px rgba(59,130,246,0.1);
+    }
+    .stat-card h3 {
+      font-size:14px;
+      color:#6b7280;
+      margin-bottom:12px;
+      font-weight:500;
+    }
+    .stat-card .value {
+      font-size:32px;
+      font-weight:700;
+      color:#3b82f6;
+      margin-bottom:8px;
+    }
+    .stat-card .label {
+      font-size:13px;
+      color:#9ca3af;
+    }
+    .section-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .section-header h2 {
+      font-size:20px;
+      color:#1f2937;
+      font-weight:600;
+    }
+    .btn-primary {
+      padding:10px 20px;
+      background:#3b82f6;
+      color:#fff;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .btn-primary:hover {
+      background:#2563eb;
+    }
+    .filter-bar {
+      background:#fff;
+      padding:16px 20px;
+      border-radius:8px;
+      box-shadow:0 2px 8px rgba(59,130,246,0.1);
+      margin-bottom:20px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .filter-bar input, .filter-bar select {
+      padding:10px 14px;
+      border:1px solid #d1d5db;
+      border-radius:6px;
+      font-size:14px;
+      min-width:180px;
+    }
+    .filter-bar input:focus, .filter-bar select:focus {
+      outline:none;
+      border-color:#3b82f6;
+    }
+    .filter-bar button {
+      padding:10px 20px;
+      background:#3b82f6;
+      color:#fff;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .filter-bar button:hover {
+      background:#2563eb;
+    }
+    .filter-bar .btn-reset {
+      background:#6b7280;
+    }
+    .filter-bar .btn-reset:hover {
+      background:#4b5563;
+    }
+    .table-container {
+      background:#fff;
+      border-radius:8px;
+      box-shadow:0 2px 8px rgba(59,130,246,0.1);
+      overflow:hidden;
+    }
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
+    thead {
+      background:#f9fafb;
+      border-bottom:2px solid #e5e7eb;
+    }
+    thead th {
+      padding:14px 16px;
+      text-align:left;
+      font-size:13px;
+      font-weight:600;
+      color:#374151;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+    }
+    tbody tr {
+      border-bottom:1px solid #f3f4f6;
+    }
+    tbody tr:hover {
+      background:#f9fafb;
+    }
+    tbody td {
+      padding:14px 16px;
+      font-size:14px;
+      color:#1f2937;
+    }
+    .dish-image-small {
+      width:50px;
+      height:50px;
+      object-fit:cover;
+      border-radius:6px;
+      background:#e5e7eb;
+    }
+    .badge {
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:4px;
+      font-size:12px;
+      font-weight:600;
+    }
+    .badge-available { background:#d1fae5; color:#065f46; }
+    .badge-unavailable { background:#fee2e2; color:#991b1b; }
+    .badge-sufficient { background:#dbeafe; color:#1e40af; }
+    .badge-insufficient { background:#fef3c7; color:#92400e; }
+    .actions {
+      display:flex;
+      gap:8px;
+    }
+    .btn-action {
+      padding:6px 12px;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+      font-size:12px;
+      font-weight:600;
+    }
+    .btn-edit {
+      background:#dbeafe;
+      color:#1e40af;
+    }
+    .btn-edit:hover {
+      background:#bfdbfe;
+    }
+    .btn-delete {
+      background:#fee2e2;
+      color:#991b1b;
+    }
+    .btn-delete:hover {
+      background:#fecaca;
+    }
+    .modal {
+      display:none;
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.5);
+      z-index:1000;
+      align-items:center;
+      justify-content:center;
+    }
+    .modal.active {
+      display:flex;
+    }
+    .modal-content {
+      background:#fff;
+      border-radius:12px;
+      width:90%;
+      max-width:600px;
+      max-height:90vh;
+      overflow-y:auto;
+    }
+    .modal-header {
+      padding:20px 24px;
+      border-bottom:1px solid #e5e7eb;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .modal-header h3 {
+      font-size:18px;
+      font-weight:600;
+      color:#1f2937;
+    }
+    .btn-close {
+      background:transparent;
+      border:none;
+      font-size:24px;
+      color:#6b7280;
+      cursor:pointer;
+      padding:0;
+      width:32px;
+      height:32px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:4px;
+    }
+    .btn-close:hover {
+      background:#f3f4f6;
+    }
+    .modal-body {
+      padding:24px;
+    }
+    .form-group {
+      margin-bottom:18px;
+    }
+    .form-group label {
+      display:block;
+      font-size:14px;
+      font-weight:500;
+      color:#374151;
+      margin-bottom:6px;
+    }
+    .form-group label .required {
+      color:#ef4444;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width:100%;
+      padding:11px 14px;
+      font-size:14px;
+      border:1px solid #d1d5db;
+      border-radius:6px;
+      font-family:inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline:none;
+      border-color:#3b82f6;
+    }
+    .form-group textarea {
+      resize:vertical;
+      min-height:80px;
+    }
+    .form-row {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    .modal-footer {
+      padding:16px 24px;
+      border-top:1px solid #e5e7eb;
+      display:flex;
+      justify-content:flex-end;
+      gap:12px;
+    }
+    .btn-secondary {
+      padding:10px 20px;
+      background:#f3f4f6;
+      color:#374151;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .btn-secondary:hover {
+      background:#e5e7eb;
+    }
+    .alert {
+      padding:12px 16px;
+      border-radius:6px;
+      margin-bottom:20px;
+      font-size:14px;
+    }
+    .alert.error {
+      background:#fee;
+      color:#b91c1c;
+      border:1px solid #fecaca;
+    }
+    .alert.success {
+      background:#f0fdf4;
+      color:#166534;
+      border:1px solid #bbf7d0;
+    }
+    .loading {
+      text-align:center;
+      padding:40px;
+      font-size:16px;
+      color:#6b7280;
+    }
+    .empty-state {
+      text-align:center;
+      padding:60px 20px;
+    }
+    .empty-state h3 {
+      font-size:18px;
+      color:#6b7280;
+      margin-bottom:8px;
+    }
+    .empty-state p {
+      color:#9ca3af;
+      font-size:14px;
+    }
+    .pagination {
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:12px;
+      margin-top:24px;
+      padding:20px;
+    }
+    .pagination button {
+      padding:10px 16px;
+      background:#fff;
+      color:#3b82f6;
+      border:1px solid #bfdbfe;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    .pagination button:hover:not(:disabled) {
+      background:#eff6ff;
+    }
+    .pagination button:disabled {
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+    .pagination span {
+      color:#6b7280;
+      font-size:14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>👨‍💼 Manager Dashboard</h1>
+    <div class="user-info">
+      <span id="userName">Đang tải...</span>
+      <button onclick="logout()">Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="alertBox"></div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Tổng số món ăn</h3>
+        <div class="value" id="totalDishes">0</div>
+        <div class="label">Món ăn trong hệ thống</div>
+      </div>
+      <div class="stat-card">
+        <h3>Món đang có sẵn</h3>
+        <div class="value" id="availableDishes">0</div>
+        <div class="label">Có thể đặt món</div>
+      </div>
+      <div class="stat-card">
+        <h3>Món hết</h3>
+        <div class="value" id="unavailableDishes">0</div>
+        <div class="label">Tạm thời hết</div>
+      </div>
+      <div class="stat-card">
+        <h3>Thiếu nguyên liệu</h3>
+        <div class="value" id="insufficientDishes">0</div>
+        <div class="label">Cần bổ sung</div>
+      </div>
+    </div>
+
+    <!-- Dishes Management -->
+    <div class="section-header">
+      <h2>Quản lý món ăn</h2>
+      <button class="btn-primary" onclick="openAddModal()">+ Thêm món mới</button>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm món ăn...">
+      <select id="typeFilter">
+        <option value="">Tất cả loại món</option>
+        <option value="Appetizer">Khai vị</option>
+        <option value="Main Course">Món chính</option>
+        <option value="Dessert">Tráng miệng</option>
+        <option value="Beverage">Đồ uống</option>
+      </select>
+      <select id="statusFilter">
+        <option value="">Tất cả trạng thái</option>
+        <option value="Available">Có sẵn</option>
+        <option value="Unavailable">Không có sẵn</option>
+      </select>
+      <button onclick="applyFilters()">Lọc</button>
+      <button class="btn-reset" onclick="resetFilters()">Đặt lại</button>
+    </div>
+
+    <div class="table-container">
+      <div id="dishesTable">
+        <div class="loading">Đang tải dữ liệu...</div>
+      </div>
+    </div>
+
+    <div id="paginationContainer"></div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div id="dishModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Thêm món mới</h3>
+        <button class="btn-close" onclick="closeModal()">&times;</button>
+      </div>
+      <form id="dishForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Tên món <span class="required">*</span></label>
+            <input type="text" id="dishName" required placeholder="VD: Phở bò">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Loại món <span class="required">*</span></label>
+              <select id="dishType" required>
+                <option value="">Chọn loại món</option>
+                <option value="Appetizer">Khai vị</option>
+                <option value="Main Course">Món chính</option>
+                <option value="Dessert">Tráng miệng</option>
+                <option value="Beverage">Đồ uống</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Giá (VNĐ) <span class="required">*</span></label>
+              <input type="number" id="dishPrice" required min="0" placeholder="50000">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Mô tả</label>
+            <textarea id="dishDescription" placeholder="Mô tả món ăn..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Hình ảnh (URL)</label>
+            <input type="text" id="dishImage" placeholder="https://example.com/image.jpg">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Trạng thái món <span class="required">*</span></label>
+              <select id="dishStatus" required>
+                <option value="Available">Có sẵn</option>
+                <option value="Unavailable">Không có sẵn</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Trạng thái nguyên liệu <span class="required">*</span></label>
+              <select id="ingredientStatus" required>
+                <option value="Sufficient">Đủ nguyên liệu</option>
+                <option value="Insufficient">Thiếu nguyên liệu</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn-primary" id="submitBtn">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentFilters = {};
+    let editingDishId = null;
+
+    // Load user info
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.Name) {
+      document.getElementById('userName').textContent = user.Name;
+    }
+
+    // Check authentication and role
+    const token = localStorage.getItem('token');
+    if (!token || user.UserRole !== 'Manager') {
+      alert('Bạn không có quyền truy cập trang này!');
+      window.location.href = '/login';
+    }
+
+    // Logout
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+
+    // Show alert
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = `<div class="alert ${type}">${message}</div>`;
+      setTimeout(() => { alertBox.innerHTML = ''; }, 3000);
+    }
+
+    // Format price
+    function formatPrice(price) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    }
+
+    // Load statistics
+    async function loadStatistics() {
+      try {
+        const response = await fetch('/api/menu?limit=1000', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const dishes = data.data;
+          
+          document.getElementById('totalDishes').textContent = dishes.length;
+          document.getElementById('availableDishes').textContent = dishes.filter(d => d.DishStatus === 'Available').length;
+          document.getElementById('unavailableDishes').textContent = dishes.filter(d => d.DishStatus === 'Unavailable').length;
+          document.getElementById('insufficientDishes').textContent = dishes.filter(d => d.IngredientStatus === 'Insufficient').length;
+        }
+      } catch (error) {
+        console.error('Load statistics error:', error);
+      }
+    }
+
+    // Load dishes
+    async function loadDishes(page = 1) {
+      try {
+        const params = new URLSearchParams({
+          page,
+          limit: 10,
+          ...currentFilters
+        });
+
+        const response = await fetch(`/api/menu?${params}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load dishes');
+
+        const data = await response.json();
+        displayDishes(data.data);
+        displayPagination(data.pagination);
+      } catch (error) {
+        console.error('Load dishes error:', error);
+        document.getElementById('dishesTable').innerHTML = `
+          <div class="empty-state">
+            <h3>❌ Không thể tải danh sách món ăn</h3>
+            <p>Vui lòng thử lại sau</p>
+          </div>
+        `;
+      }
+    }
+
+    // Display dishes
+    function displayDishes(dishes) {
+      const container = document.getElementById('dishesTable');
+
+      if (!dishes || dishes.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>🍽️ Không tìm thấy món ăn nào</h3>
+            <p>Thử thay đổi bộ lọc hoặc thêm món mới</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Hình ảnh</th>
+              <th>Tên món</th>
+              <th>Loại</th>
+              <th>Giá</th>
+              <th>Trạng thái món</th>
+              <th>Nguyên liệu</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${dishes.map(dish => `
+              <tr>
+                <td>
+                  <img src="${dish.DishImage || '/images/default-dish.jpg'}" 
+                       alt="${dish.DishName}" 
+                       class="dish-image-small" 
+                       onerror="this.src='/images/default-dish.jpg'">
+                </td>
+                <td><strong>${dish.DishName}</strong></td>
+                <td>${dish.DishType}</td>
+                <td>${formatPrice(dish.DishPrice)}</td>
+                <td>
+                  <span class="badge ${dish.DishStatus === 'Available' ? 'badge-available' : 'badge-unavailable'}">
+                    ${dish.DishStatus === 'Available' ? '✓ Có sẵn' : '✗ Hết'}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge ${dish.IngredientStatus === 'Sufficient' ? 'badge-sufficient' : 'badge-insufficient'}">
+                    ${dish.IngredientStatus === 'Sufficient' ? '✓ Đủ' : '⚠ Thiếu'}
+                  </span>
+                </td>
+                <td>
+                  <div class="actions">
+                    <button class="btn-action btn-edit" onclick="openEditModal('${dish._id}')">✏️ Sửa</button>
+                    <button class="btn-action btn-delete" onclick="deleteDish('${dish._id}', '${dish.DishName}')">🗑️ Xóa</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // Display pagination
+    function displayPagination(pagination) {
+      currentPage = pagination.currentPage;
+      totalPages = pagination.totalPages;
+
+      const container = document.getElementById('paginationContainer');
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="pagination">
+          <button onclick="loadDishes(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+            ← Trước
+          </button>
+          <span>Trang ${currentPage} / ${totalPages}</span>
+          <button onclick="loadDishes(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+            Sau →
+          </button>
+        </div>
+      `;
+    }
+
+    // Apply filters
+    function applyFilters() {
+      currentFilters = {};
+      
+      const search = document.getElementById('searchInput').value.trim();
+      const type = document.getElementById('typeFilter').value;
+      const status = document.getElementById('statusFilter').value;
+
+      if (search) currentFilters.search = search;
+      if (type) currentFilters.type = type;
+      if (status) currentFilters.status = status;
+
+      loadDishes(1);
+    }
+
+    // Reset filters
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('typeFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+      currentFilters = {};
+      loadDishes(1);
+    }
+
+    // Open add modal
+    function openAddModal() {
+      editingDishId = null;
+      document.getElementById('modalTitle').textContent = 'Thêm món mới';
+      document.getElementById('dishForm').reset();
+      document.getElementById('dishModal').classList.add('active');
+    }
+
+    // Open edit modal
+    async function openEditModal(dishId) {
+      try {
+        editingDishId = dishId;
+        document.getElementById('modalTitle').textContent = 'Chỉnh sửa món ăn';
+
+        const response = await fetch(`/api/manager/dishes/${dishId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load dish');
+
+        const data = await response.json();
+        const dish = data.data;
+
+        document.getElementById('dishName').value = dish.DishName;
+        document.getElementById('dishType').value = dish.DishType;
+        document.getElementById('dishPrice').value = dish.DishPrice;
+        document.getElementById('dishDescription').value = dish.DishDescription || '';
+        document.getElementById('dishImage').value = dish.DishImage || '';
+        document.getElementById('dishStatus').value = dish.DishStatus;
+        document.getElementById('ingredientStatus').value = dish.IngredientStatus;
+
+        document.getElementById('dishModal').classList.add('active');
+      } catch (error) {
+        console.error('Load dish error:', error);
+        showAlert('❌ Không thể tải thông tin món ăn!', 'error');
+      }
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('dishModal').classList.remove('active');
+      editingDishId = null;
+    }
+
+    // Submit form
+    document.getElementById('dishForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Đang xử lý...';
+
+      const dishData = {
+        DishName: document.getElementById('dishName').value.trim(),
+        DishType: document.getElementById('dishType').value,
+        DishPrice: parseFloat(document.getElementById('dishPrice').value),
+        DishDescription: document.getElementById('dishDescription').value.trim(),
+        DishImage: document.getElementById('dishImage').value.trim(),
+        DishStatus: document.getElementById('dishStatus').value,
+        IngredientStatus: document.getElementById('ingredientStatus').value
+      };
+
+      try {
+        const url = editingDishId 
+          ? `/api/manager/dishes/${editingDishId}` 
+          : '/api/manager/dishes';
+        const method = editingDishId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dishData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert(`✅ ${editingDishId ? 'Cập nhật' : 'Thêm'} món ăn thành công!`, 'success');
+          closeModal();
+          loadDishes(currentPage);
+          loadStatistics();
+        } else {
+          showAlert(`❌ ${data.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Submit error:', error);
+        showAlert('❌ Lỗi kết nối! Vui lòng thử lại sau.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Lưu';
+      }
+    });
+
+    // Delete dish
+    async function deleteDish(dishId, dishName) {
+      if (!confirm(`Bạn có chắc chắn muốn xóa món "${dishName}"?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/manager/dishes/${dishId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert('✅ Xóa món ăn thành công!', 'success');
+          loadDishes(currentPage);
+          loadStatistics();
+        } else {
+          showAlert(`❌ ${data.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        showAlert('❌ Lỗi kết nối! Vui lòng thử lại sau.', 'error');
+      }
+    }
+
+    // Enter key to search
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') applyFilters();
+    });
+
+    // Initialize
+    (async function init() {
+      await loadStatistics();
+      await loadDishes(1);
+    })();
+  </script>
+</body>
+</html>

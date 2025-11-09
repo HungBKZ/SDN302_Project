@@ -24,6 +24,13 @@ router.post('/register', validateRegister, accountController.register);
 router.post('/login', validateLogin, accountController.login);
 
 /**
+ * @route   POST /api/account/google-login
+ * @desc    Đăng nhập bằng Google
+ * @access  Public
+ */
+router.post('/google-login', accountController.googleLogin);
+
+/**
  * @route   POST /api/account/logout
  * @desc    Đăng xuất
  * @access  Private

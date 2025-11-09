@@ -197,6 +197,87 @@ class AccountService {
 
         return true;
     }
+
+    /**
+     * Đăng nhập hoặc tạo tài khoản bằng Google
+     * @param {Object} googleProfile - Thông tin từ Google
+     * @returns {Promise<Object>} Token và thông tin user
+     */
+    async loginWithGoogle(googleProfile) {
+        const { sub: googleId, email, name, picture } = googleProfile;
+
+        // Tìm tài khoản theo GoogleId
+        let account = await Account.findOne({ 
+            GoogleId: googleId,
+            IsDeleted: false 
+        });
+
+        // Nếu chưa có, tìm theo email
+        if (!account) {
+            account = await Account.findOne({ 
+                UserEmail: email.toLowerCase(),
+                IsDeleted: false 
+            });
+        }
+
+        // Nếu tìm thấy theo email, cập nhật GoogleId
+        if (account && !account.GoogleId) {
+            account.GoogleId = googleId;
+            if (picture && picture !== account.UserImage) {
+                account.UserImage = picture;
+            }
+            account.UpdatedAt = new Date();
+            await account.save();
+        }
+
+        // Nếu không tìm thấy, tạo tài khoản mới
+        if (!account) {
+            // Tạo UserCode tự động
+            const userCount = await Account.countDocuments();
+            const userCode = `GOOGLE${Date.now().toString().slice(-8)}${userCount + 1}`;
+
+            account = new Account({
+                UserCode: userCode,
+                UserEmail: email.toLowerCase(),
+                UserPhone: '', // Để trống, có thể cập nhật sau
+                GoogleId: googleId,
+                Name: name,
+                UserRole: ACCOUNT_ROLES[5], // 'Customer'
+                IdentityCard: '', // Để trống
+                UserAddress: '',
+                UserImage: picture || 'default-avatar.jpg',
+                IsDeleted: false,
+                CreatedAt: new Date(),
+                UpdatedAt: new Date()
+            });
+
+            await account.save();
+        }
+
+        // Tạo JWT token
+        const token = jwt.sign(
+            {
+                _id: account._id,
+                UserCode: account.UserCode,
+                UserEmail: account.UserEmail,
+                UserRole: account.UserRole,
+                Name: account.Name
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        // Không trả về sensitive data
+        const userData = account.toObject();
+        delete userData.UserPassword;
+        delete userData.IdentityCard;
+        delete userData.GoogleId;
+
+        return {
+            token,
+            user: userData
+        };
+    }
 }
 
 module.exports = new AccountService();

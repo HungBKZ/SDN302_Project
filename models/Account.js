@@ -86,3 +86,4 @@ module.exports = {
     Account,
     ACCOUNT_ROLES
 };
+};

@@ -196,6 +196,60 @@ class AccountController {
             });
         }
     }
+
+    /**
+     * GET /api/account/profile
+     * Lấy thông tin profile của user đang đăng nhập
+     */
+    async getProfile(req, res, next) {
+        try {
+            // req.user được set bởi auth middleware (_id từ JWT)
+            const userId = req.user._id;
+            const profile = await accountService.getProfileById(userId);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Lấy thông tin profile thành công',
+                data: profile
+            });
+        } catch (error) {
+            if (error.message === 'Không tìm thấy tài khoản') {
+                return res.status(404).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            next(error);
+        }
+    }
+
+    /**
+     * PUT /api/account/profile
+     * Cập nhật thông tin profile
+     */
+    async updateProfile(req, res, next) {
+        try {
+            const userId = req.user._id;
+            const updateData = req.body;
+            
+            const updatedProfile = await accountService.updateProfile(userId, updateData);
+
+            return res.status(200).json({
+                success: true,
+                message: 'Cập nhật profile thành công',
+                data: updatedProfile
+            });
+        } catch (error) {
+            if (error.message === 'Không tìm thấy tài khoản' ||
+                error.message === 'Số điện thoại đã được sử dụng') {
+                return res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            next(error);
+        }
+    }
 }
 
 module.exports = new AccountController();

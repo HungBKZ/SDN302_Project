@@ -5,7 +5,8 @@ const auth = require('../../core/middlewares/auth');
 
 router.post('/', auth, ReservationController.createReservation);
 router.get('/schedule/:id', auth, ReservationController.viewScheduleBooking);
-router.put('/:id', auth, ReservationController.updateStatusReservation);
+router.patch('/:id/status', auth, ReservationController.updateStatusReservation);
+router.put('/:id', auth, ReservationController.updateInformationReservation);
 router.delete('/:id', auth, ReservationController.deleteReservation);
 
 module.exports = router;

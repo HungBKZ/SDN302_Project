@@ -181,3 +181,50 @@ exports.deleteReservation = async (req, res) => {
         res.status(500).json({ message: 'Error deleting reservation', error: error.message });
     }
 }
+
+exports.updateInformationReservation = async (req, res) => {
+    try {
+        const userId = req.user?.id || req.user?._id;
+        const account = await Account.findById(userId);
+        const { id } = req.params;
+        const { ReservationTime, NumberOfGuests } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ message: 'Missing reservation ID' });
+        }
+
+        if (!account || (account.UserRole !== 'Manager' && account.UserRole !== 'Customer')) {
+            return res.status(403).json({ message: 'Forbidden: Managers and Customers only' });
+        }
+
+        const reservation = await Reservation.findById(id);
+        if (!reservation) {
+            return res.status(404).json({ message: 'Reservation not found' });
+        }
+
+        if (account.UserRole === 'Customer' && reservation.userId?.toString() === userId?.toString()) {
+            const update = await Reservation.findByIdAndUpdate(id, { ReservationTime, NumberOfGuests }, { new: true });
+
+            return res.status(200).json({
+                message: 'Reservation updated successfully',
+                reservation: update
+            });
+        }
+        else if (account.UserRole === 'Manager') {
+            const update = await Reservation.findByIdAndUpdate(id, { ReservationTime, NumberOfGuests }, { new: true });
+
+            return res.status(200).json({
+                message: 'Reservation updated successfully',
+                reservation: update
+            });
+        }
+
+        else {
+            return res.status(403).json({ message: 'Forbidden: You cannot update this reservation' });
+        }
+
+    } catch (error) {
+        console.error('Error updating reservation information:', error);
+        res.status(500).json({ message: 'Error updating reservation information', error: error.message });
+    }
+}

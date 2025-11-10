@@ -294,109 +294,109 @@ class AccountService {
         return account;
     }
 
-    /**
-     * Cập nhật thông tin profile
-     * @param {String} userId - ID của user
-     * @param {Object} updateData - Dữ liệu cần cập nhật
-     * @returns {Promise<Object>} Thông tin profile đã cập nhật
-     */
-    async updateProfile(userId, updateData) {
-        const account = await Account.findById(userId);
+    // /**
+    //  * Cập nhật thông tin profile
+    //  * @param {String} userId - ID của user
+    //  * @param {Object} updateData - Dữ liệu cần cập nhật
+    //  * @returns {Promise<Object>} Thông tin profile đã cập nhật
+    //  */
+    // async updateProfile(userId, updateData) {
+    //     const account = await Account.findById(userId);
         
-        if (!account) {
-            throw new Error('Không tìm thấy tài khoản');
-        }
+    //     if (!account) {
+    //         throw new Error('Không tìm thấy tài khoản');
+    //     }
 
-        // Chỉ cho phép cập nhật một số trường
-        const allowedFields = ['Name', 'UserPhone', 'IdentityCard', 'UserAddress'];
-        const updates = {};
+    //     // Chỉ cho phép cập nhật một số trường
+    //     const allowedFields = ['Name', 'UserPhone', 'IdentityCard', 'UserAddress'];
+    //     const updates = {};
 
-        for (const field of allowedFields) {
-            if (updateData[field] !== undefined) {
-                updates[field] = updateData[field];
-            }
-        }
+    //     for (const field of allowedFields) {
+    //         if (updateData[field] !== undefined) {
+    //             updates[field] = updateData[field];
+    //         }
+    //     }
 
-        // Kiểm tra số điện thoại trùng (nếu có thay đổi)
-        if (updates.UserPhone && updates.UserPhone !== account.UserPhone) {
-            const existingPhone = await Account.findOne({ 
-                UserPhone: updates.UserPhone,
-                _id: { $ne: userId }
-            });
-            if (existingPhone) {
-                throw new Error('Số điện thoại đã được sử dụng');
-            }
-        }
+    //     // Kiểm tra số điện thoại trùng (nếu có thay đổi)
+    //     if (updates.UserPhone && updates.UserPhone !== account.UserPhone) {
+    //         const existingPhone = await Account.findOne({ 
+    //             UserPhone: updates.UserPhone,
+    //             _id: { $ne: userId }
+    //         });
+    //         if (existingPhone) {
+    //             throw new Error('Số điện thoại đã được sử dụng');
+    //         }
+    //     }
 
-        // Cập nhật
-        Object.assign(account, updates);
-        await account.save();
+    //     // Cập nhật
+    //     Object.assign(account, updates);
+    //     await account.save();
 
-        // Trả về dữ liệu không có password
-        const updatedAccount = account.toObject();
-        delete updatedAccount.UserPassword;
+    //     // Trả về dữ liệu không có password
+    //     const updatedAccount = account.toObject();
+    //     delete updatedAccount.UserPassword;
 
-        return updatedAccount;
-    }
+    //     return updatedAccount;
+    // }
 
-    async isUserExist(userId) {
-        const account = await Account.findById(userId);
+    // async isUserExist(userId) {
+    //     const account = await Account.findById(userId);
 
-        if (!account) {
-            return null;
-        }
+    //     if (!account) {
+    //         return null;
+    //     }
 
-        if (account.IsDeleted) {
-            return null;
-        }
+    //     if (account.IsDeleted) {
+    //         return null;
+    //     }
 
-        return account;
-    }
+    //     return account;
+    // }
 
-    /**
-     * Cập nhật thông tin profile
-     * @param {String} userId - ID của user
-     * @param {Object} updateData - Dữ liệu cần cập nhật
-     * @returns {Promise<Object>} Thông tin profile đã cập nhật
-     */
-    async updateProfile(userId, updateData) {
-        const account = await Account.findById(userId);
+    // /**
+    //  * Cập nhật thông tin profile
+    //  * @param {String} userId - ID của user
+    //  * @param {Object} updateData - Dữ liệu cần cập nhật
+    //  * @returns {Promise<Object>} Thông tin profile đã cập nhật
+    //  */
+    // async updateProfile(userId, updateData) {
+    //     const account = await Account.findById(userId);
         
-        if (!account) {
-            throw new Error('Không tìm thấy tài khoản');
-        }
+    //     if (!account) {
+    //         throw new Error('Không tìm thấy tài khoản');
+    //     }
 
-        // Chỉ cho phép cập nhật một số trường
-        const allowedFields = ['Name', 'UserPhone', 'IdentityCard', 'UserAddress'];
-        const updates = {};
+    //     // Chỉ cho phép cập nhật một số trường
+    //     const allowedFields = ['Name', 'UserPhone', 'IdentityCard', 'UserAddress'];
+    //     const updates = {};
 
-        for (const field of allowedFields) {
-            if (updateData[field] !== undefined) {
-                updates[field] = updateData[field];
-            }
-        }
+    //     for (const field of allowedFields) {
+    //         if (updateData[field] !== undefined) {
+    //             updates[field] = updateData[field];
+    //         }
+    //     }
 
-        // Kiểm tra số điện thoại trùng (nếu có thay đổi)
-        if (updates.UserPhone && updates.UserPhone !== account.UserPhone) {
-            const existingPhone = await Account.findOne({ 
-                UserPhone: updates.UserPhone,
-                _id: { $ne: userId }
-            });
-            if (existingPhone) {
-                throw new Error('Số điện thoại đã được sử dụng');
-            }
-        }
+    //     // Kiểm tra số điện thoại trùng (nếu có thay đổi)
+    //     if (updates.UserPhone && updates.UserPhone !== account.UserPhone) {
+    //         const existingPhone = await Account.findOne({ 
+    //             UserPhone: updates.UserPhone,
+    //             _id: { $ne: userId }
+    //         });
+    //         if (existingPhone) {
+    //             throw new Error('Số điện thoại đã được sử dụng');
+    //         }
+    //     }
 
-        // Cập nhật
-        Object.assign(account, updates);
-        await account.save();
+    //     // Cập nhật
+    //     Object.assign(account, updates);
+    //     await account.save();
 
-        // Trả về dữ liệu không có password
-        const updatedAccount = account.toObject();
-        delete updatedAccount.UserPassword;
+    //     // Trả về dữ liệu không có password
+    //     const updatedAccount = account.toObject();
+    //     delete updatedAccount.UserPassword;
 
-        return updatedAccount;
-    }
+    //     return updatedAccount;
+    // }
     /* ---------- New features - Nhu (ĐÃ HOÀN THIỆN) ---------- */
 
     /**

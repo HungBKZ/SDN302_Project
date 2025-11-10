@@ -269,33 +269,33 @@ class AccountController {
         }
     }
 
-    /**
-     * PUT /api/account/profile
-     * Cập nhật thông tin profile
-     */
-    async updateProfile(req, res, next) {
-        try {
-            const userId = req.user._id;
-            const updateData = req.body;
+    // /**
+    //  * PUT /api/account/profile
+    //  * Cập nhật thông tin profile
+    //  */
+    // async updateProfile(req, res, next) {
+    //     try {
+    //         const userId = req.user._id;
+    //         const updateData = req.body;
             
-            const updatedProfile = await accountService.updateProfile(userId, updateData);
+    //         const updatedProfile = await accountService.updateProfile(userId, updateData);
 
-            return res.status(200).json({
-                success: true,
-                message: 'Cập nhật profile thành công',
-                data: updatedProfile
-            });
-        } catch (error) {
-            if (error.message === 'Không tìm thấy tài khoản' ||
-                error.message === 'Số điện thoại đã được sử dụng') {
-                return res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
-            }
-            next(error);
-        }
-    }
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: 'Cập nhật profile thành công',
+    //             data: updatedProfile
+    //         });
+    //     } catch (error) {
+    //         if (error.message === 'Không tìm thấy tài khoản' ||
+    //             error.message === 'Số điện thoại đã được sử dụng') {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: error.message
+    //             });
+    //         }
+    //         next(error);
+    //     }
+    // }
 
     /* ---------- New features - Nhu (ĐÃ TÁI CẤU TRÚC) ---------- */
 
@@ -305,7 +305,6 @@ class AccountController {
      */
     async selfDelete(req, res, next) {
         try {
-            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
             const acc = await _checkCustomerSelf(req, res);
             if (!acc) return;
 
@@ -317,40 +316,11 @@ class AccountController {
     }
 
     /**
-     * PUT /api/account/profile
-     * Cập nhật thông tin profile
-     */
-    async updateProfile(req, res, next) {
-        try {
-            const userId = req.user._id;
-            const updateData = req.body;
-            
-            const updatedProfile = await accountService.updateProfile(userId, updateData);
-
-            return res.status(200).json({
-                success: true,
-                message: 'Cập nhật profile thành công',
-                data: updatedProfile
-            });
-        } catch (error) {
-            if (error.message === 'Không tìm thấy tài khoản' ||
-                error.message === 'Số điện thoại đã được sử dụng') {
-                return res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
-            }
-            next(error);
-        }
-    }
-
-    /**
      * POST /api/account/staff
      * Create staff account (Manager or Admin)
      */
     async createStaffAccount(req, res, next) {
         try {
-            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
             const admin = await _checkManagerOrAdmin(req, res);
             if (!admin) return;
 
@@ -381,7 +351,6 @@ class AccountController {
      */
     async listAccounts(req, res, next) {
         try {
-            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
             const admin = await _checkManagerOrAdmin(req, res);
             if (!admin) return;
 
@@ -398,7 +367,6 @@ class AccountController {
      */
     async getAccountDetails(req, res, next) {
         try {
-            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
             const admin = await _checkManagerOrAdmin(req, res);
             if (!admin) return;
 
@@ -421,7 +389,6 @@ class AccountController {
      */
     async softDeleteAccount(req, res, next) {
         try {
-            // ⚡ Sửa lỗi: Gọi hàm helper bên ngoài (không dùng 'this')
             const admin = await _checkManagerOrAdmin(req, res);
             if (!admin) return;
 
